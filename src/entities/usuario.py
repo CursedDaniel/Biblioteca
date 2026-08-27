@@ -5,7 +5,6 @@ from datetime import date
 class Usuario:
     def __init__(
         self,
-        id_usuario: uuid.UUID | None,
         nombre: str,
         apellido: str,
         documento: str,
@@ -13,6 +12,7 @@ class Usuario:
         telefono: str,
         fecha_registro: date,
         estado: str,
+        id_usuario: uuid.UUID | None = None,
     ):
         self.id_usuario = id_usuario if id_usuario is not None else uuid.uuid4()
         self.nombre = nombre.strip()
