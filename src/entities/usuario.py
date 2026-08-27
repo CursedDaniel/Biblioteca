@@ -22,3 +22,14 @@ class Usuario:
         self.telefono = telefono.strip()
         self.fecha_registro = fecha_registro
         self.estado = estado.strip()
+
+    def nombre_completo(self) -> str:
+        partes = [self.nombre, self.apellido]
+        return " ".join(parte for parte in partes if parte).strip()
+
+    def __str__(self) -> str:
+        return (
+            f"ID: {self.id_usuario}\n"
+            f"Nombre: {self.nombre_completo()}\n"
+            f"Usuario: {self.nombre_usuario}"
+        )
