@@ -1,23 +1,24 @@
+import uuid
 from datetime import date
 
 
 class Usuario:
     def __init__(
         self,
-        id_usuario: int,
+        id_usuario: uuid.UUID | None,
         nombre: str,
         apellido: str,
         documento: str,
         correo: str,
         telefono: str,
-        fecha_registro: str,
+        fecha_registro: date,
         estado: str,
     ):
-        self.id_usuario = id_usuario
-        self.nombre = nombre
-        self.apellido = apellido
-        self.documento = documento
-        self.correo = correo
-        self.telefono = telefono
+        self.id_usuario = id_usuario if id_usuario is not None else uuid.uuid4()
+        self.nombre = nombre.strip()
+        self.apellido = apellido.strip()
+        self.documento = documento.strip()
+        self.correo = correo.strip()
+        self.telefono = telefono.strip()
         self.fecha_registro = fecha_registro
-        self.estado = estado
+        self.estado = estado.strip()
