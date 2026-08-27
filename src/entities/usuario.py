@@ -1,3 +1,6 @@
+from datetime import date
+
+
 class Usuario:
     def __init__(
         self,

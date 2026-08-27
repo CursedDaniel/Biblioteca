@@ -1,9 +1,12 @@
+from datetime import date
+
+
 class Libro:
     def __init__(
         self,
         id_libro: int,
         titulo: str,
-        fecha_publicacion: str,
+        fecha_publicacion: date,
         numero_paginas: str,
         idioma: str,
         descripcion: str,
