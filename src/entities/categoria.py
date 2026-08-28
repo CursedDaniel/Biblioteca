@@ -1,6 +1,5 @@
-# se hace la entidad categoria para poder crear la tabla en la base de datos
 import uuid
-from datatime import date
+
 
 class Categoria:
     def __init__(
