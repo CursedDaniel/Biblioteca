@@ -223,7 +223,7 @@ def menu_usuarios(usuario_crud):
 
                     mostrar_exito("Usuario actualizado correctamente.")
 
-                    usuario_actualizado = usuario_crud.obtener_por_id(id_usuario)
+                    usuario_actualizado = usuario_crud.obtener_por_documento(documento)
 
                     console.print(
                         Panel(
