@@ -41,6 +41,12 @@ class UsuarioCrud:
 
         return None
 
+    def obtener_por_documento(self, documento):
+        for usuario in self.usuarios:
+            if usuario.documento == documento:
+                return usuario
+        return None
+
     def obtener_todos(self) -> list[Usuario]:
         return self.usuarios
 
