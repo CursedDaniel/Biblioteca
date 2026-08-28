@@ -10,8 +10,8 @@ class Usuario:
         documento: str,
         correo: str,
         telefono: str,
-        fecha_registro: date,
-        estado: str,
+        fecha_registro: date | None = None,
+        estado: str = "activo",
         id_usuario: uuid.UUID | None = None,
     ):
         self.id_usuario = id_usuario if id_usuario is not None else uuid.uuid4()
@@ -20,16 +20,19 @@ class Usuario:
         self.documento = documento.strip()
         self.correo = correo.strip()
         self.telefono = telefono.strip()
-        self.fecha_registro = fecha_registro
+        self.fecha_registro = (
+            fecha_registro if fecha_registro is not None else date.today()
+        )
         self.estado = estado.strip()
-
-    def nombre_completo(self) -> str:
-        partes = [self.nombre, self.apellido]
-        return " ".join(parte for parte in partes if parte).strip()
 
     def __str__(self) -> str:
         return (
             f"ID: {self.id_usuario}\n"
-            f"Nombre: {self.nombre_completo()}\n"
-            f"Usuario: {self.nombre_usuario}"
+            f"Nombre: {self.nombre}\n"
+            f"Apellido: {self.apellido}\n"
+            f"Documento: {self.documento}\n"
+            f"Correo: {self.correo}\n"
+            f"Teléfono: {self.telefono}\n"
+            f"Fecha de registro: {self.fecha_registro}\n"
+            f"Estado: {self.estado}"
         )
