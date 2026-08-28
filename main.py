@@ -172,11 +172,9 @@ def menu_usuarios(usuario_crud):
                 pausar()
 
         elif opcion == "4":
-            id_usuario = obtener_uuid("ID del usuario")
-
-            if id_usuario:
-                usuario = usuario_crud.obtener_por_id(id_usuario)
-
+            documento = Prompt.ask("Documento del usuario")
+            usuario = usuario_crud.obtener_por_documento(documento)
+            if usuario:
                 if usuario is None:
                     mostrar_error("Usuario no encontrado.")
                 else:
@@ -213,7 +211,7 @@ def menu_usuarios(usuario_crud):
                     estado = estados[opcion_estado]
 
                     usuario_crud.actualizar(
-                        id_usuario=id_usuario,
+                        id_usuario=usuario.id_usuario,
                         nombre=nombre,
                         apellido=apellido,
                         documento=documento,
