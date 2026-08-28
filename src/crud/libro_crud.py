@@ -13,7 +13,7 @@ class LibroCrud:
         titulo: str,
         fecha_publicacion: date,
         numero_paginas: int,
-        idiomas: str,
+        idioma: str,
         descripcion: str,
         id_categoria: uuid.UUID,
         id_editorial: uuid.UUID,
@@ -22,7 +22,7 @@ class LibroCrud:
             titulo=titulo,
             fecha_publicacion=fecha_publicacion,
             numero_paginas=numero_paginas,
-            idiomas=idiomas,
+            idioma=idioma,
             descripcion=descripcion,
             id_categoria=id_categoria,
             id_editorial=id_editorial,
@@ -50,7 +50,7 @@ class LibroCrud:
         titulo: str,
         fecha_publicacion: date,
         numero_paginas: int,
-        idiomas: str,
+        idioma: str,
         descripcion: str,
         id_categoria: uuid.UUID,
         id_editorial: uuid.UUID,
@@ -63,7 +63,7 @@ class LibroCrud:
         libro.titulo = titulo.strip()
         libro.fecha_publicacion = fecha_publicacion
         libro.numero_paginas = numero_paginas
-        libro.idiomas = idiomas.strip()
+        libro.idioma = idioma.strip()
         libro.descripcion = descripcion.strip()
         libro.id_categoria = id_categoria
         libro.id_editorial = id_editorial

@@ -846,7 +846,7 @@ def menu_libros(libro_crud):
                 pausar()
                 continue
 
-            idiomas = Prompt.ask("Idiomas")
+            idiomas = Prompt.ask("Idioma")
             descripcion = Prompt.ask("Descripción")
 
             id_categoria = obtener_uuid("ID de la categoría")
@@ -861,7 +861,7 @@ def menu_libros(libro_crud):
                 titulo=titulo,
                 fecha_publicacion=fecha_publicacion,
                 numero_paginas=numero_paginas,
-                idiomas=idiomas,
+                idioma=idiomas,
                 descripcion=descripcion,
                 id_categoria=id_categoria,
                 id_editorial=id_editorial,
@@ -900,7 +900,7 @@ def menu_libros(libro_crud):
                         libro.titulo,
                         str(libro.fecha_publicacion),
                         str(libro.numero_paginas),
-                        libro.idiomas,
+                        libro.idioma,
                         str(libro.id_categoria),
                         str(libro.id_editorial),
                     )
@@ -970,7 +970,7 @@ def menu_libros(libro_crud):
                                 titulo=titulo,
                                 fecha_publicacion=fecha_publicacion,
                                 numero_paginas=numero_paginas,
-                                idiomas=idiomas,
+                                idioma=idioma,
                                 descripcion=descripcion,
                                 id_categoria=id_categoria,
                                 id_editorial=id_editorial,
