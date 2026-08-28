@@ -169,7 +169,7 @@ def menu_usuarios(usuario_crud):
                         )
                     )
 
-            pausar()
+                pausar()
 
         elif opcion == "4":
             id_usuario = obtener_uuid("ID del usuario")
@@ -180,12 +180,37 @@ def menu_usuarios(usuario_crud):
                 if usuario is None:
                     mostrar_error("Usuario no encontrado.")
                 else:
+                    console.print(
+                        Panel(
+                            "[bold cyan]✏️ ACTUALIZAR USUARIO[/bold cyan]",
+                            expand=False,
+                            border_style="cyan",
+                        )
+                    )
+
                     nombre = Prompt.ask("Nombre", default=usuario.nombre)
                     apellido = Prompt.ask("Apellido", default=usuario.apellido)
                     documento = Prompt.ask("Documento", default=usuario.documento)
                     correo = Prompt.ask("Correo", default=usuario.correo)
                     telefono = Prompt.ask("Teléfono", default=usuario.telefono)
-                    estado = Prompt.ask("Estado", default=usuario.estado)
+
+                    console.print("\n[bold cyan]Estado del usuario[/bold cyan]")
+                    console.print(" [cyan]1.[/cyan] Activo")
+                    console.print(" [cyan]2.[/cyan] Inactivo")
+                    console.print(" [cyan]3.[/cyan] Suspendido")
+
+                    opcion_estado = Prompt.ask(
+                        "\n[yellow]Seleccione el estado[/yellow]",
+                        choices=["1", "2", "3"],
+                    )
+
+                    estados = {
+                        "1": "activo",
+                        "2": "inactivo",
+                        "3": "suspendido",
+                    }
+
+                    estado = estados[opcion_estado]
 
                     usuario_crud.actualizar(
                         id_usuario=id_usuario,
@@ -199,6 +224,16 @@ def menu_usuarios(usuario_crud):
                     )
 
                     mostrar_exito("Usuario actualizado correctamente.")
+
+                    usuario_actualizado = usuario_crud.obtener_por_id(id_usuario)
+
+                    console.print(
+                        Panel(
+                            str(usuario_actualizado),
+                            title="👤 Usuario actualizado",
+                            border_style="green",
+                        )
+                    )
 
             pausar()
 
