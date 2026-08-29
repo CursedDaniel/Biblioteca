@@ -62,6 +62,65 @@ def obtener_uuid(mensaje="ID"):
         return None
 
 
+def buscar_prestamo_por_documento_y_codigo(prestamo_crud, usuario_crud, ejemplar_crud):
+    documento = Prompt.ask("Documento del usuario")
+
+    usuario = usuario_crud.obtener_por_documento(documento)
+
+    if usuario is None:
+        mostrar_error("Usuario no encontrado.")
+        return None
+
+    codigo_inventario = Prompt.ask("Código de inventario del ejemplar")
+
+    ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
+
+    if ejemplar is None:
+        mostrar_error("Ejemplar no encontrado.")
+        return None
+
+    coincidencias = prestamo_crud.obtener_por_usuario_y_ejemplar(
+        usuario.id_usuario, ejemplar.id_ejemplar
+    )
+
+    if not coincidencias:
+        mostrar_error("No se encontró ningún préstamo con esos datos.")
+        return None
+
+    if len(coincidencias) == 1:
+        return coincidencias[0]
+
+    console.print(
+        "\n[yellow]Hay varios préstamos para ese usuario y ejemplar:[/yellow]"
+    )
+
+    tabla = Table(show_lines=True)
+    tabla.add_column("Fecha préstamo", style="cyan")
+    tabla.add_column("Fecha límite")
+    tabla.add_column("Estado")
+
+    for prestamo in coincidencias:
+        tabla.add_row(
+            str(prestamo.fecha_prestamo),
+            str(prestamo.fecha_limite),
+            prestamo.estado,
+        )
+
+    console.print(tabla)
+
+    fecha_prestamo = obtener_fecha("Fecha del préstamo a seleccionar")
+
+    if fecha_prestamo is None:
+        return None
+
+    for prestamo in coincidencias:
+        if prestamo.fecha_prestamo == fecha_prestamo:
+            return prestamo
+
+    mostrar_error("No se encontró un préstamo con esa fecha exacta.")
+    return None
+
+
 def obtener_fecha(mensaje):
     texto = Prompt.ask(f"[yellow]{mensaje} (AAAA-MM-DD)[/yellow]").strip()
 
@@ -1230,7 +1289,7 @@ def menu_ejemplares(ejemplar_crud, libro_crud):
 # ==========================================================
 
 
-def menu_prestamos(prestamo_crud, usuario_crud):
+def menu_prestamos(prestamo_crud, usuario_crud, ejemplar_crud, libro_crud):
 
     while True:
 
@@ -1263,19 +1322,28 @@ def menu_prestamos(prestamo_crud, usuario_crud):
                 pausar()
                 continue
 
-            id_ejemplar = obtener_uuid("ID del ejemplar")
+            codigo_inventario = Prompt.ask("Código de inventario del ejemplar")
+
+            ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
+
+            if ejemplar is None:
+
+                mostrar_error("Ejemplar no encontrado.")
+
+                pausar()
+                continue
 
             fecha_prestamo = obtener_fecha("Fecha del préstamo")
 
             fecha_limite = obtener_fecha("Fecha límite")
 
-            if id_ejemplar is None or fecha_prestamo is None or fecha_limite is None:
+            if fecha_prestamo is None or fecha_limite is None:
                 pausar()
                 continue
 
             prestamo = prestamo_crud.crear(
                 id_usuario=usuario.id_usuario,
-                id_ejemplar=id_ejemplar,
+                id_ejemplar=ejemplar.id_ejemplar,
                 fecha_prestamo=fecha_prestamo,
                 fecha_limite=fecha_limite,
             )
@@ -1310,10 +1378,27 @@ def menu_prestamos(prestamo_crud, usuario_crud):
 
                 for prestamo in prestamos:
 
+                    usuario = usuario_crud.obtener_por_id(prestamo.id_usuario)
+                    ejemplar = ejemplar_crud.obtener_por_id(prestamo.id_ejemplar)
+
+                    if usuario:
+                        texto_usuario = f"{usuario.documento} - {usuario.nombre}"
+                    else:
+                        texto_usuario = "—"
+
+                    if ejemplar:
+                        libro = libro_crud.obtener_por_id(ejemplar.id_libro)
+                        titulo_libro = libro.titulo if libro else "—"
+                        texto_ejemplar = (
+                            f"{ejemplar.codigo_inventario} - {titulo_libro}"
+                        )
+                    else:
+                        texto_ejemplar = "—"
+
                     tabla.add_row(
                         str(prestamo.id_prestamo),
-                        str(prestamo.id_usuario),
-                        str(prestamo.id_ejemplar),
+                        texto_usuario,
+                        texto_ejemplar,
                         str(prestamo.fecha_prestamo),
                         str(prestamo.fecha_limite),
                         str(prestamo.fecha_devolucion),
@@ -1326,112 +1411,90 @@ def menu_prestamos(prestamo_crud, usuario_crud):
 
         elif opcion == "3":
 
-            id_prestamo = obtener_uuid("ID del préstamo")
+            prestamo = buscar_prestamo_por_documento_y_codigo(
+                prestamo_crud, usuario_crud, ejemplar_crud
+            )
 
-            if id_prestamo:
+            if prestamo is not None:
 
-                prestamo = prestamo_crud.obtener_por_id(id_prestamo)
-
-                if prestamo is None:
-
-                    mostrar_error("Préstamo no encontrado.")
-
-                else:
-
-                    console.print(
-                        Panel(
-                            str(prestamo),
-                            title="🔄 Préstamo encontrado",
-                            border_style="blue",
-                        )
+                console.print(
+                    Panel(
+                        str(prestamo),
+                        title="🔄 Préstamo encontrado",
+                        border_style="blue",
                     )
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_prestamo = obtener_uuid("ID del préstamo")
+            prestamo = buscar_prestamo_por_documento_y_codigo(
+                prestamo_crud, usuario_crud, ejemplar_crud
+            )
 
-            if id_prestamo:
+            if prestamo is not None:
 
-                prestamo = prestamo_crud.obtener_por_id(id_prestamo)
+                nueva_fecha_limite = obtener_fecha("Nueva fecha límite")
 
-                if prestamo is None:
+                if nueva_fecha_limite is None:
+                    pausar()
+                    continue
 
-                    mostrar_error("Préstamo no encontrado.")
+                texto_devolucion = Prompt.ask(
+                    "Fecha de devolución (AAAA-MM-DD, vacío si no se ha devuelto)",
+                    default="",
+                )
 
-                else:
+                fecha_devolucion = None
 
-                    id_usuario = obtener_uuid("ID del usuario")
+                if texto_devolucion.strip():
 
-                    id_ejemplar = obtener_uuid("ID del ejemplar")
+                    try:
 
-                    fecha_prestamo = obtener_fecha("Fecha del préstamo")
+                        fecha_devolucion = datetime.strptime(
+                            texto_devolucion, "%Y-%m-%d"
+                        ).date()
 
-                    fecha_limite = obtener_fecha("Fecha límite")
+                    except ValueError:
 
-                    if id_usuario and id_ejemplar and fecha_prestamo and fecha_limite:
+                        mostrar_error("Fecha de devolución inválida.")
 
-                        texto_devolucion = Prompt.ask(
-                            "Fecha de devolución (AAAA-MM-DD, vacío si no se ha devuelto)",
-                            default="",
-                        )
+                        pausar()
+                        continue
 
-                        fecha_devolucion = None
+                estado = Prompt.ask("Estado", default=prestamo.estado)
 
-                        if texto_devolucion.strip():
+                prestamo_crud.actualizar(
+                    id_prestamo=prestamo.id_prestamo,
+                    id_usuario=prestamo.id_usuario,
+                    id_ejemplar=prestamo.id_ejemplar,
+                    fecha_prestamo=prestamo.fecha_prestamo,
+                    fecha_limite=nueva_fecha_limite,
+                    fecha_devolucion=fecha_devolucion,
+                    estado=estado,
+                )
 
-                            try:
-
-                                fecha_devolucion = datetime.strptime(
-                                    texto_devolucion, "%Y-%m-%d"
-                                ).date()
-
-                            except ValueError:
-
-                                mostrar_error("Fecha de devolución inválida.")
-
-                                pausar()
-                                continue
-
-                        estado = Prompt.ask("Estado", default=prestamo.estado)
-
-                        prestamo_crud.actualizar(
-                            id_prestamo=id_prestamo,
-                            id_usuario=id_usuario,
-                            id_ejemplar=id_ejemplar,
-                            fecha_prestamo=fecha_prestamo,
-                            fecha_limite=fecha_limite,
-                            fecha_devolucion=fecha_devolucion,
-                            estado=estado,
-                        )
-
-                        mostrar_exito("Préstamo actualizado correctamente.")
+                mostrar_exito("Préstamo actualizado correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_prestamo = obtener_uuid("ID del préstamo")
+            prestamo = buscar_prestamo_por_documento_y_codigo(
+                prestamo_crud, usuario_crud, ejemplar_crud
+            )
 
-            if id_prestamo:
+            if prestamo is not None:
 
-                prestamo = prestamo_crud.obtener_por_id(id_prestamo)
+                confirmar = Confirm.ask("¿Está seguro de eliminar este préstamo?")
 
-                if prestamo is None:
+                if confirmar:
 
-                    mostrar_error("Préstamo no encontrado.")
-
-                else:
-
-                    confirmar = Confirm.ask("¿Está seguro de eliminar este préstamo?")
-
-                    if confirmar:
-
-                        if prestamo_crud.eliminar(id_prestamo):
-                            mostrar_exito("Préstamo eliminado correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar el préstamo.")
+                    if prestamo_crud.eliminar(prestamo.id_prestamo):
+                        mostrar_exito("Préstamo eliminado correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar el préstamo.")
 
             pausar()
 
