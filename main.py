@@ -7,6 +7,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Prompt, Confirm
 
+from src.crud.ejemplar_crud import EjemplarCrud
+from src.crud.libro_crud import LibroCrud
 from src.crud.usuario_crud import UsuarioCrud
 from src.crud.libro_crud import LibroCrud
 from src.crud.autor_crud import AutorCrud
@@ -1026,7 +1028,7 @@ def menu_libros(libro_crud, categoria_crud, editorial_crud):
 # ==========================================================
 
 
-def menu_ejemplares(ejemplar_crud):
+def menu_ejemplares(ejemplar_crud, libro_crud):
 
     while True:
 
@@ -1048,13 +1050,20 @@ def menu_ejemplares(ejemplar_crud):
 
         if opcion == "1":
 
-            id_libro = obtener_uuid("ID del libro")
+            titulo_libro = Prompt.ask("Título del libro")
+
+            libro = libro_crud.obtener_por_titulo(titulo_libro)
+
+            if libro is None:
+                mostrar_error("Libro no encontrado.")
+                pausar()
+                continue
 
             codigo_inventario = Prompt.ask("Código de inventario")
 
             fecha_adquisicion = obtener_fecha("Fecha de adquisición")
 
-            if id_libro is None or fecha_adquisicion is None:
+            if fecha_adquisicion is None:
                 pausar()
                 continue
 
@@ -1062,7 +1071,7 @@ def menu_ejemplares(ejemplar_crud):
             ubicacion = Prompt.ask("Ubicación")
 
             ejemplar = ejemplar_crud.crear(
-                id_libro=id_libro,
+                id_libro=libro.id_libro,
                 codigo_inventario=codigo_inventario,
                 fecha_adquisicion=fecha_adquisicion,
                 estado=estado,
@@ -1098,9 +1107,12 @@ def menu_ejemplares(ejemplar_crud):
 
                 for ejemplar in ejemplares:
 
+                    libro = libro_crud.obtener_por_id(ejemplar.id_libro)
+                    titulo_libro = libro.titulo if libro else "—"
+
                     tabla.add_row(
                         str(ejemplar.id_ejemplar),
-                        str(ejemplar.id_libro),
+                        titulo_libro,
                         ejemplar.codigo_inventario,
                         str(ejemplar.fecha_adquisicion),
                         ejemplar.estado,
@@ -1113,91 +1125,99 @@ def menu_ejemplares(ejemplar_crud):
 
         elif opcion == "3":
 
-            id_ejemplar = obtener_uuid("ID del ejemplar")
+            codigo_inventario = Prompt.ask("Código de inventario")
 
-            if id_ejemplar:
+            ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
 
-                ejemplar = ejemplar_crud.obtener_por_id(id_ejemplar)
+            if ejemplar is None:
 
-                if ejemplar is None:
+                mostrar_error("Ejemplar no encontrado.")
 
-                    mostrar_error("Ejemplar no encontrado.")
+            else:
 
-                else:
-
-                    console.print(
-                        Panel(
-                            str(ejemplar),
-                            title="📦 Ejemplar encontrado",
-                            border_style="blue",
-                        )
+                console.print(
+                    Panel(
+                        str(ejemplar),
+                        title="📦 Ejemplar encontrado",
+                        border_style="blue",
                     )
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_ejemplar = obtener_uuid("ID del ejemplar")
+            codigo_inventario = Prompt.ask("Código de inventario")
 
-            if id_ejemplar:
+            ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
 
-                ejemplar = ejemplar_crud.obtener_por_id(id_ejemplar)
+            if ejemplar is None:
 
-                if ejemplar is None:
+                mostrar_error("Ejemplar no encontrado.")
 
-                    mostrar_error("Ejemplar no encontrado.")
+            else:
 
-                else:
+                libro_actual = libro_crud.obtener_por_id(ejemplar.id_libro)
 
-                    id_libro = obtener_uuid("ID del libro")
+                titulo_libro = Prompt.ask(
+                    "Título del libro",
+                    default=libro_actual.titulo if libro_actual else "",
+                )
 
-                    codigo_inventario = Prompt.ask(
-                        "Código de inventario", default=ejemplar.codigo_inventario
-                    )
+                libro = libro_crud.obtener_por_titulo(titulo_libro)
 
-                    fecha_adquisicion = obtener_fecha("Fecha de adquisición")
+                if libro is None:
+                    mostrar_error("Libro no encontrado.")
+                    pausar()
+                    continue
 
-                    if id_libro and fecha_adquisicion:
+                nuevo_codigo = Prompt.ask(
+                    "Código de inventario", default=ejemplar.codigo_inventario
+                )
 
-                        estado = Prompt.ask("Estado", default=ejemplar.estado)
+                fecha_adquisicion = obtener_fecha("Fecha de adquisición")
 
-                        ubicacion = Prompt.ask("Ubicación", default=ejemplar.ubicacion)
+                if fecha_adquisicion is None:
+                    pausar()
+                    continue
 
-                        ejemplar_crud.actualizar(
-                            id_ejemplar=id_ejemplar,
-                            id_libro=id_libro,
-                            codigo_inventario=codigo_inventario,
-                            fecha_adquisicion=fecha_adquisicion,
-                            estado=estado,
-                            ubicacion=ubicacion,
-                        )
+                estado = Prompt.ask("Estado", default=ejemplar.estado)
 
-                        mostrar_exito("Ejemplar actualizado correctamente.")
+                ubicacion = Prompt.ask("Ubicación", default=ejemplar.ubicacion)
+
+                ejemplar_crud.actualizar(
+                    id_ejemplar=ejemplar.id_ejemplar,
+                    id_libro=libro.id_libro,
+                    codigo_inventario=nuevo_codigo,
+                    fecha_adquisicion=fecha_adquisicion,
+                    estado=estado,
+                    ubicacion=ubicacion,
+                )
+
+                mostrar_exito("Ejemplar actualizado correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_ejemplar = obtener_uuid("ID del ejemplar")
+            codigo_inventario = Prompt.ask("Código de inventario")
 
-            if id_ejemplar:
+            ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
 
-                ejemplar = ejemplar_crud.obtener_por_id(id_ejemplar)
+            if ejemplar is None:
 
-                if ejemplar is None:
+                mostrar_error("Ejemplar no encontrado.")
 
-                    mostrar_error("Ejemplar no encontrado.")
+            else:
 
-                else:
+                confirmar = Confirm.ask("¿Está seguro de eliminar este ejemplar?")
 
-                    confirmar = Confirm.ask("¿Está seguro de eliminar este ejemplar?")
+                if confirmar:
 
-                    if confirmar:
-
-                        if ejemplar_crud.eliminar(id_ejemplar):
-                            mostrar_exito("Ejemplar eliminado correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar el ejemplar.")
+                    if ejemplar_crud.eliminar(ejemplar.id_ejemplar):
+                        mostrar_exito("Ejemplar eliminado correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar el ejemplar.")
 
             pausar()
 
@@ -1737,7 +1757,7 @@ def main():
 
         elif opcion == "6":
 
-            menu_ejemplares(ejemplar_crud)
+            menu_ejemplares(ejemplar_crud, libro_crud)
 
         elif opcion == "7":
 
