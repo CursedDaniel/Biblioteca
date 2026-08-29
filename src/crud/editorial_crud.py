@@ -36,6 +36,15 @@ class EditorialCrud:
 
         return None
 
+    def obtener_por_nombre(self, nombre: str) -> Editorial | None:
+        nombre_normalizado = nombre.strip().lower()
+
+        for editorial in self.editoriales:
+            if editorial.nombre.lower() == nombre_normalizado:
+                return editorial
+
+        return None
+
     def obtener_todos(self) -> list[Editorial]:
         return self.editoriales
 
