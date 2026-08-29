@@ -1,4 +1,3 @@
-
 import random
 from datetime import date, timedelta
 
@@ -122,7 +121,7 @@ def cargar_datos_prueba(
             titulo="El señor de los anillos",
             fecha_publicacion=date(1954, 7, 29),
             numero_paginas=1178,
-            idiomas="Español, Inglés",
+            idiomas="Español",
             descripcion="Historia épica ambientada en la Tierra Media.",
             id_categoria=categorias[3].id_categoria,
             id_editorial=editoriales[1].id_editorial,
@@ -131,7 +130,7 @@ def cargar_datos_prueba(
             titulo="Fundación",
             fecha_publicacion=date(1951, 5, 1),
             numero_paginas=255,
-            idiomas="Inglés, Español",
+            idiomas="Inglés",
             descripcion="Obra clásica de ciencia ficción.",
             id_categoria=categorias[0].id_categoria,
             id_editorial=editoriales[2].id_editorial,
@@ -140,7 +139,7 @@ def cargar_datos_prueba(
             titulo="Viaje al centro de la Tierra",
             fecha_publicacion=date(1864, 11, 25),
             numero_paginas=384,
-            idiomas="Francés, Español",
+            idiomas="Francés",
             descripcion="Novela de aventuras y exploración.",
             id_categoria=categorias[1].id_categoria,
             id_editorial=editoriales[0].id_editorial,
@@ -249,9 +248,7 @@ def cargar_datos_prueba(
     prestamos = []
 
     ejemplares_disponibles = [
-        ejemplar
-        for ejemplar in ejemplares
-        if ejemplar.estado.lower() == "disponible"
+        ejemplar for ejemplar in ejemplares if ejemplar.estado.lower() == "disponible"
     ]
 
     cantidad_prestamos = min(4, len(ejemplares_disponibles))
@@ -260,17 +257,13 @@ def cargar_datos_prueba(
         ejemplar = ejemplares_disponibles[i]
         usuario = usuarios[i % len(usuarios)]
 
-        fecha_prestamo = date.today() - timedelta(
-            days=random.randint(1, 30)
-        )
+        fecha_prestamo = date.today() - timedelta(days=random.randint(1, 30))
 
         fecha_limite = fecha_prestamo + timedelta(days=15)
 
         # Algunos préstamos ya fueron devueltos
         if i % 2 == 0:
-            fecha_devolucion = fecha_prestamo + timedelta(
-                days=random.randint(5, 14)
-            )
+            fecha_devolucion = fecha_prestamo + timedelta(days=random.randint(5, 14))
             estado = "devuelto"
         else:
             fecha_devolucion = None
@@ -294,7 +287,10 @@ def cargar_datos_prueba(
     # Solo creamos multas si existen préstamos
     for prestamo in prestamos:
         # Una multa aleatoria para algunos préstamos
-        if prestamo.estado.lower() != "devuelto" and date.today() > prestamo.fecha_limite:
+        if (
+            prestamo.estado.lower() != "devuelto"
+            and date.today() > prestamo.fecha_limite
+        ):
             multa_crud.crear(
                 id_prestamo=prestamo.id_prestamo,
                 id_ejemplar=prestamo.id_ejemplar,
@@ -305,4 +301,3 @@ def cargar_datos_prueba(
             )
 
     print("Datos de prueba cargados correctamente.")
-
