@@ -7,6 +7,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Prompt, Confirm
 
+from crud import libro_crud
 from src.crud.ejemplar_crud import EjemplarCrud
 from src.crud.libro_crud import LibroCrud
 from src.crud.usuario_crud import UsuarioCrud
@@ -1819,12 +1820,10 @@ def main():
             menu_editoriales(editorial_crud)
 
         elif opcion == "6":
-
             menu_ejemplares(ejemplar_crud, libro_crud)
 
         elif opcion == "7":
-
-            menu_prestamos(prestamo_crud, usuario_crud)
+            menu_prestamos(prestamo_crud, usuario_crud, ejemplar_crud, libro_crud)
 
         elif opcion == "8":
 
