@@ -559,80 +559,72 @@ def menu_categorias(categoria_crud):
 
         elif opcion == "3":
 
-            id_categoria = obtener_uuid("ID de la categoría")
+            nombre = Prompt.ask("Nombre de la categoría")
 
-            if id_categoria:
+            categoria = categoria_crud.obtener_por_nombre(nombre)
 
-                categoria = categoria_crud.obtener_por_id(id_categoria)
+            if categoria is None:
 
-                if categoria is None:
+                mostrar_error("Categoría no encontrada.")
 
-                    mostrar_error("Categoría no encontrada.")
+            else:
 
-                else:
-
-                    console.print(
-                        Panel(
-                            str(categoria),
-                            title="🏷️ Categoría encontrada",
-                            border_style="blue",
-                        )
+                console.print(
+                    Panel(
+                        str(categoria),
+                        title="🏷️ Categoría encontrada",
+                        border_style="blue",
                     )
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_categoria = obtener_uuid("ID de la categoría")
+            nombre = Prompt.ask("Nombre de la categoría")
 
-            if id_categoria:
+            categoria = categoria_crud.obtener_por_nombre(nombre)
 
-                categoria = categoria_crud.obtener_por_id(id_categoria)
+            if categoria is None:
 
-                if categoria is None:
+                mostrar_error("Categoría no encontrada.")
 
-                    mostrar_error("Categoría no encontrada.")
+            else:
 
-                else:
+                nuevo_nombre = Prompt.ask("Nombre", default=categoria.nombre)
 
-                    nombre = Prompt.ask("Nombre", default=categoria.nombre)
+                descripcion = Prompt.ask("Descripción", default=categoria.descripcion)
 
-                    descripcion = Prompt.ask(
-                        "Descripción", default=categoria.descripcion
-                    )
+                categoria_crud.actualizar(
+                    id_categoria=categoria.id_categoria,
+                    nombre=nuevo_nombre,
+                    descripcion=descripcion,
+                )
 
-                    categoria_crud.actualizar(
-                        id_categoria=id_categoria,
-                        nombre=nombre,
-                        descripcion=descripcion,
-                    )
-
-                    mostrar_exito("Categoría actualizada correctamente.")
+                mostrar_exito("Categoría actualizada correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_categoria = obtener_uuid("ID de la categoría")
+            nombre = Prompt.ask("Nombre de la categoría")
 
-            if id_categoria:
+            categoria = categoria_crud.obtener_por_nombre(nombre)
 
-                categoria = categoria_crud.obtener_por_id(id_categoria)
+            if categoria is None:
 
-                if categoria is None:
+                mostrar_error("Categoría no encontrada.")
 
-                    mostrar_error("Categoría no encontrada.")
+            else:
 
-                else:
+                confirmar = Confirm.ask("¿Está seguro de eliminar esta categoría?")
 
-                    confirmar = Confirm.ask("¿Está seguro de eliminar esta categoría?")
+                if confirmar:
 
-                    if confirmar:
-
-                        if categoria_crud.eliminar(id_categoria):
-                            mostrar_exito("Categoría eliminada correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar la categoría.")
+                    if categoria_crud.eliminar(categoria.id_categoria):
+                        mostrar_exito("Categoría eliminada correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar la categoría.")
 
             pausar()
 
@@ -725,87 +717,81 @@ def menu_editoriales(editorial_crud):
 
         elif opcion == "3":
 
-            id_editorial = obtener_uuid("ID de la editorial")
+            nombre = Prompt.ask("Nombre de la editorial")
 
-            if id_editorial:
+            editorial = editorial_crud.obtener_por_nombre(nombre)
 
-                editorial = editorial_crud.obtener_por_id(id_editorial)
+            if editorial is None:
 
-                if editorial is None:
+                mostrar_error("Editorial no encontrada.")
 
-                    mostrar_error("Editorial no encontrada.")
+            else:
 
-                else:
-
-                    console.print(
-                        Panel(
-                            str(editorial),
-                            title="🏢 Editorial encontrada",
-                            border_style="blue",
-                        )
+                console.print(
+                    Panel(
+                        str(editorial),
+                        title="🏢 Editorial encontrada",
+                        border_style="blue",
                     )
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_editorial = obtener_uuid("ID de la editorial")
+            nombre = Prompt.ask("Nombre de la editorial")
 
-            if id_editorial:
+            editorial = editorial_crud.obtener_por_nombre(nombre)
 
-                editorial = editorial_crud.obtener_por_id(id_editorial)
+            if editorial is None:
 
-                if editorial is None:
+                mostrar_error("Editorial no encontrada.")
 
-                    mostrar_error("Editorial no encontrada.")
+            else:
 
-                else:
+                nuevo_nombre = Prompt.ask("Nombre", default=editorial.nombre)
 
-                    nombre = Prompt.ask("Nombre", default=editorial.nombre)
+                pais = Prompt.ask("País", default=editorial.pais)
 
-                    pais = Prompt.ask("País", default=editorial.pais)
+                ciudad = Prompt.ask("Ciudad", default=editorial.ciudad)
 
-                    ciudad = Prompt.ask("Ciudad", default=editorial.ciudad)
+                telefono = Prompt.ask("Teléfono", default=editorial.telefono)
 
-                    telefono = Prompt.ask("Teléfono", default=editorial.telefono)
+                correo = Prompt.ask("Correo", default=editorial.correo)
 
-                    correo = Prompt.ask("Correo", default=editorial.correo)
+                editorial_crud.actualizar(
+                    id_editorial=editorial.id_editorial,
+                    nombre=nuevo_nombre,
+                    pais=pais,
+                    ciudad=ciudad,
+                    telefono=telefono,
+                    correo=correo,
+                )
 
-                    editorial_crud.actualizar(
-                        id_editorial=id_editorial,
-                        nombre=nombre,
-                        pais=pais,
-                        ciudad=ciudad,
-                        telefono=telefono,
-                        correo=correo,
-                    )
-
-                    mostrar_exito("Editorial actualizada correctamente.")
+                mostrar_exito("Editorial actualizada correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_editorial = obtener_uuid("ID de la editorial")
+            nombre = Prompt.ask("Nombre de la editorial")
 
-            if id_editorial:
+            editorial = editorial_crud.obtener_por_nombre(nombre)
 
-                editorial = editorial_crud.obtener_por_id(id_editorial)
+            if editorial is None:
 
-                if editorial is None:
+                mostrar_error("Editorial no encontrada.")
 
-                    mostrar_error("Editorial no encontrada.")
+            else:
 
-                else:
+                confirmar = Confirm.ask("¿Está seguro de eliminar esta editorial?")
 
-                    confirmar = Confirm.ask("¿Está seguro de eliminar esta editorial?")
+                if confirmar:
 
-                    if confirmar:
-
-                        if editorial_crud.eliminar(id_editorial):
-                            mostrar_exito("Editorial eliminada correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar la editorial.")
+                    if editorial_crud.eliminar(editorial.id_editorial):
+                        mostrar_exito("Editorial eliminada correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar la editorial.")
 
             pausar()
 
@@ -818,7 +804,7 @@ def menu_editoriales(editorial_crud):
 # ==========================================================
 
 
-def menu_libros(libro_crud):
+def menu_libros(libro_crud, categoria_crud, editorial_crud):
 
     while True:
 
@@ -853,11 +839,19 @@ def menu_libros(libro_crud):
             idiomas = Prompt.ask("Idioma")
             descripcion = Prompt.ask("Descripción")
 
-            id_categoria = obtener_uuid("ID de la categoría")
+            nombre_categoria = Prompt.ask("Nombre de la categoría")
+            categoria = categoria_crud.obtener_por_nombre(nombre_categoria)
 
-            id_editorial = obtener_uuid("ID de la editorial")
+            if categoria is None:
+                mostrar_error("Categoría no encontrada.")
+                pausar()
+                continue
 
-            if id_categoria is None or id_editorial is None:
+            nombre_editorial = Prompt.ask("Nombre de la editorial")
+            editorial = editorial_crud.obtener_por_nombre(nombre_editorial)
+
+            if editorial is None:
+                mostrar_error("Editorial no encontrada.")
                 pausar()
                 continue
 
@@ -867,8 +861,8 @@ def menu_libros(libro_crud):
                 numero_paginas=numero_paginas,
                 idiomas=idiomas,
                 descripcion=descripcion,
-                id_categoria=id_categoria,
-                id_editorial=id_editorial,
+                id_categoria=categoria.id_categoria,
+                id_editorial=editorial.id_editorial,
             )
 
             mostrar_exito("Libro creado correctamente.")
@@ -899,14 +893,20 @@ def menu_libros(libro_crud):
 
                 for libro in libros:
 
+                    categoria = categoria_crud.obtener_por_id(libro.id_categoria)
+                    editorial = editorial_crud.obtener_por_id(libro.id_editorial)
+
+                    nombre_categoria = categoria.nombre if categoria else "—"
+                    nombre_editorial = editorial.nombre if editorial else "—"
+
                     tabla.add_row(
                         str(libro.id_libro),
                         libro.titulo,
                         str(libro.fecha_publicacion),
                         str(libro.numero_paginas),
                         libro.idiomas,
-                        str(libro.id_categoria),
-                        str(libro.id_editorial),
+                        nombre_categoria,
+                        nombre_editorial,
                     )
 
                 console.print(tabla)
@@ -915,97 +915,105 @@ def menu_libros(libro_crud):
 
         elif opcion == "3":
 
-            id_libro = obtener_uuid("ID del libro")
+            titulo = Prompt.ask("Título del libro")
 
-            if id_libro:
+            libro = libro_crud.obtener_por_titulo(titulo)
 
-                libro = libro_crud.obtener_por_id(id_libro)
+            if libro is None:
 
-                if libro is None:
+                mostrar_error("Libro no encontrado.")
 
-                    mostrar_error("Libro no encontrado.")
+            else:
 
-                else:
-
-                    console.print(
-                        Panel(
-                            str(libro), title="📖 Libro encontrado", border_style="blue"
-                        )
-                    )
+                console.print(
+                    Panel(str(libro), title="📖 Libro encontrado", border_style="blue")
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_libro = obtener_uuid("ID del libro")
+            titulo = Prompt.ask("Título del libro")
 
-            if id_libro:
+            libro = libro_crud.obtener_por_titulo(titulo)
 
-                libro = libro_crud.obtener_por_id(id_libro)
+            if libro is None:
 
-                if libro is None:
+                mostrar_error("Libro no encontrado.")
 
-                    mostrar_error("Libro no encontrado.")
+            else:
 
-                else:
+                nuevo_titulo = Prompt.ask("Título", default=libro.titulo)
 
-                    titulo = Prompt.ask("Título", default=libro.titulo)
+                fecha_publicacion = obtener_fecha("Nueva fecha de publicación")
 
-                    fecha_publicacion = obtener_fecha("Nueva fecha de publicación")
+                numero_paginas = obtener_entero("Número de páginas")
 
-                    numero_paginas = obtener_entero("Número de páginas")
+                if fecha_publicacion is not None and numero_paginas is not None:
 
-                    if fecha_publicacion is not None and numero_paginas is not None:
+                    idiomas = Prompt.ask("Idiomas", default=libro.idiomas)
 
-                        idiomas = Prompt.ask("Idiomas", default=libro.idiomas)
+                    descripcion = Prompt.ask("Descripción", default=libro.descripcion)
 
-                        descripcion = Prompt.ask(
-                            "Descripción", default=libro.descripcion
-                        )
+                    categoria_actual = categoria_crud.obtener_por_id(libro.id_categoria)
+                    nombre_categoria = Prompt.ask(
+                        "Nombre de la categoría",
+                        default=categoria_actual.nombre if categoria_actual else "",
+                    )
+                    categoria = categoria_crud.obtener_por_nombre(nombre_categoria)
 
-                        id_categoria = obtener_uuid("ID de la categoría")
+                    editorial_actual = editorial_crud.obtener_por_id(libro.id_editorial)
+                    nombre_editorial = Prompt.ask(
+                        "Nombre de la editorial",
+                        default=editorial_actual.nombre if editorial_actual else "",
+                    )
+                    editorial = editorial_crud.obtener_por_nombre(nombre_editorial)
 
-                        id_editorial = obtener_uuid("ID de la editorial")
+                    if categoria is None:
+                        mostrar_error("Categoría no encontrada.")
+                        pausar()
+                        continue
 
-                        if id_categoria and id_editorial:
+                    if editorial is None:
+                        mostrar_error("Editorial no encontrada.")
+                        pausar()
+                        continue
 
-                            libro_crud.actualizar(
-                                id_libro=id_libro,
-                                titulo=titulo,
-                                fecha_publicacion=fecha_publicacion,
-                                numero_paginas=numero_paginas,
-                                idiomas=idiomas,
-                                descripcion=descripcion,
-                                id_categoria=id_categoria,
-                                id_editorial=id_editorial,
-                            )
+                    libro_crud.actualizar(
+                        id_libro=libro.id_libro,
+                        titulo=nuevo_titulo,
+                        fecha_publicacion=fecha_publicacion,
+                        numero_paginas=numero_paginas,
+                        idiomas=idiomas,
+                        descripcion=descripcion,
+                        id_categoria=categoria.id_categoria,
+                        id_editorial=editorial.id_editorial,
+                    )
 
-                            mostrar_exito("Libro actualizado correctamente.")
+                    mostrar_exito("Libro actualizado correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_libro = obtener_uuid("ID del libro")
+            titulo = Prompt.ask("Título del libro")
 
-            if id_libro:
+            libro = libro_crud.obtener_por_titulo(titulo)
 
-                libro = libro_crud.obtener_por_id(id_libro)
+            if libro is None:
 
-                if libro is None:
+                mostrar_error("Libro no encontrado.")
 
-                    mostrar_error("Libro no encontrado.")
+            else:
 
-                else:
+                confirmar = Confirm.ask("¿Está seguro de eliminar este libro?")
 
-                    confirmar = Confirm.ask("¿Está seguro de eliminar este libro?")
+                if confirmar:
 
-                    if confirmar:
-
-                        if libro_crud.eliminar(id_libro):
-                            mostrar_exito("Libro eliminado correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar el libro.")
+                    if libro_crud.eliminar(libro.id_libro):
+                        mostrar_exito("Libro eliminado correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar el libro.")
 
             pausar()
 
@@ -1713,8 +1721,7 @@ def main():
             menu_usuarios(usuario_crud)
 
         elif opcion == "2":
-
-            menu_libros(libro_crud)
+            menu_libros(libro_crud, categoria_crud, editorial_crud)
 
         elif opcion == "3":
 
