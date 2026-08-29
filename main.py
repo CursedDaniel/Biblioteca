@@ -7,7 +7,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Prompt, Confirm
 
-from crud import libro_crud
+from src.crud.libro_crud import LibroCrud
 from src.crud.ejemplar_crud import EjemplarCrud
 from src.crud.libro_crud import LibroCrud
 from src.crud.usuario_crud import UsuarioCrud
