@@ -16,6 +16,10 @@ from src.crud.ejemplar_crud import EjemplarCrud
 from src.crud.prestamo_crud import PrestamoCrud
 from src.crud.multa_crud import MultaCrud
 
+from src.crud.categoria_crud import CategoriaCrud
+from src.crud.multa_crud import MultaCrud
+from datos_prueba import cargar_datos_prueba
+
 console = Console()
 
 
@@ -1652,6 +1656,17 @@ def main():
     ejemplar_crud = EjemplarCrud()
     prestamo_crud = PrestamoCrud()
     multa_crud = MultaCrud()
+
+    cargar_datos_prueba(
+        usuario_crud,
+        libro_crud,
+        autor_crud,
+        categoria_crud,
+        editorial_crud,
+        ejemplar_crud,
+        prestamo_crud,
+        multa_crud,
+    )
 
     while True:
 
