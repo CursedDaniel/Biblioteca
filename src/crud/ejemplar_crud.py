@@ -37,6 +37,15 @@ class EjemplarCrud:
 
         return None
 
+    def obtener_por_codigo_inventario(self, codigo_inventario: str) -> Ejemplar | None:
+        codigo_normalizado = codigo_inventario.strip().lower()
+
+        for ejemplar in self.ejemplares:
+            if ejemplar.codigo_inventario.strip().lower() == codigo_normalizado:
+                return ejemplar
+
+        return None
+
     def obtener_todos(self) -> list[Ejemplar]:
         return self.ejemplares
 
