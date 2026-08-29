@@ -41,6 +41,15 @@ class LibroCrud:
 
         return None
 
+    def obtener_por_titulo(self, titulo: str) -> Libro | None:
+        titulo_normalizado = titulo.strip().lower()
+
+        for libro in self.libros:
+            if libro.titulo.strip().lower() == titulo_normalizado:
+                return libro
+
+        return None
+
     def obtener_todos(self) -> list[Libro]:
         return self.libros
 

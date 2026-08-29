@@ -42,6 +42,17 @@ class PrestamoCrud:
     def obtener_todos(self) -> list[Prestamo]:
         return self.prestamos
 
+    def obtener_por_usuario_y_ejemplar(
+        self,
+        id_usuario: uuid.UUID,
+        id_ejemplar: uuid.UUID,
+    ) -> list[Prestamo]:
+        return [
+            prestamo
+            for prestamo in self.prestamos
+            if prestamo.id_usuario == id_usuario and prestamo.id_ejemplar == id_ejemplar
+        ]
+
     def actualizar(
         self,
         id_prestamo: uuid.UUID,

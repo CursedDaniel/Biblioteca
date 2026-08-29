@@ -30,8 +30,26 @@ class CategoriaCrud:
 
         return None
 
+    def obtener_por_nombre(self, nombre: str) -> Categoria | None:
+        nombre_normalizado = nombre.strip().lower()
+
+        for categoria in self.categorias:
+            if categoria.nombre.lower() == nombre_normalizado:
+                return categoria
+
+        return None
+
     def obtener_todos(self) -> list[Categoria]:
         return self.categorias
+
+    def obtener_por_nombre(self, nombre: str) -> Categoria | None:
+        nombre_normalizado = nombre.strip().lower()
+
+        for categoria in self.categorias:
+            if categoria.nombre.lower() == nombre_normalizado:
+                return categoria
+
+        return None
 
     def actualizar(
         self,
