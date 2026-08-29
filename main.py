@@ -904,7 +904,7 @@ def menu_libros(libro_crud):
                         libro.titulo,
                         str(libro.fecha_publicacion),
                         str(libro.numero_paginas),
-                        libro.idioma,
+                        libro.idiomas,
                         str(libro.id_categoria),
                         str(libro.id_editorial),
                     )
@@ -1422,7 +1422,7 @@ def menu_multas(multa_crud, prestamo_crud):
 
         console.clear()
 
-        mostrar_titulo("⚠️ MULTAS", "Gestión de multas")
+        mostrar_titulo("⚠️ MULTAS ", "Gestión de multas")
 
         console.print(" [cyan]1.[/cyan] ➕ Crear multa")
         console.print(" [cyan]2.[/cyan] 📋 Listar multas")
@@ -1488,7 +1488,7 @@ def menu_multas(multa_crud, prestamo_crud):
 
             mostrar_exito("Multa creada correctamente.")
 
-            console.print(Panel(str(multa), title="⚠️ Multa", border_style="green"))
+            console.print(Panel(str(multa), title="⚠️ Multa ", border_style="green"))
 
             pausar()
 
