@@ -8,7 +8,7 @@ class Libro:
         titulo: str,
         fecha_publicacion: date,
         numero_paginas: str,
-        idioma: str,
+        idiomas: str,
         descripcion: str,
         id_categoria: str,
         id_editorial: str,
@@ -18,7 +18,7 @@ class Libro:
         self.titulo = titulo
         self.fecha_publicacion = fecha_publicacion
         self.numero_paginas = numero_paginas
-        self.idioma = idioma
+        self.idiomas = idiomas
         self.descripcion = descripcion
         self.id_categoria = id_categoria
         self.id_editorial = id_editorial
@@ -29,7 +29,7 @@ class Libro:
             f"Título: {self.titulo}\n"
             f"Fecha de Publicación: {self.fecha_publicacion}\n"
             f"Número de Páginas: {self.numero_paginas}\n"
-            f"Idioma: {self.idioma}\n"
+            f"Idiomas: {self.idiomas}\n"
             f"Descripción: {self.descripcion}\n"
             f"ID Categoría: {self.id_categoria}\n"
             f"ID Editorial: {self.id_editorial}"

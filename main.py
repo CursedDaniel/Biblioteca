@@ -7,6 +7,9 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.prompt import Prompt, Confirm
 
+from src.crud.libro_crud import LibroCrud
+from src.crud.ejemplar_crud import EjemplarCrud
+from src.crud.libro_crud import LibroCrud
 from src.crud.usuario_crud import UsuarioCrud
 from src.crud.libro_crud import LibroCrud
 from src.crud.autor_crud import AutorCrud
@@ -15,6 +18,10 @@ from src.crud.editorial_crud import EditorialCrud
 from src.crud.ejemplar_crud import EjemplarCrud
 from src.crud.prestamo_crud import PrestamoCrud
 from src.crud.multa_crud import MultaCrud
+
+from src.crud.categoria_crud import CategoriaCrud
+from src.crud.multa_crud import MultaCrud
+from datos_prueba import cargar_datos_prueba
 
 console = Console()
 
@@ -54,6 +61,65 @@ def obtener_uuid(mensaje="ID"):
     except ValueError:
         mostrar_error("El ID ingresado no es válido.")
         return None
+
+
+def buscar_prestamo_por_documento_y_codigo(prestamo_crud, usuario_crud, ejemplar_crud):
+    documento = Prompt.ask("Documento del usuario")
+
+    usuario = usuario_crud.obtener_por_documento(documento)
+
+    if usuario is None:
+        mostrar_error("Usuario no encontrado.")
+        return None
+
+    codigo_inventario = Prompt.ask("Código de inventario del ejemplar")
+
+    ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
+
+    if ejemplar is None:
+        mostrar_error("Ejemplar no encontrado.")
+        return None
+
+    coincidencias = prestamo_crud.obtener_por_usuario_y_ejemplar(
+        usuario.id_usuario, ejemplar.id_ejemplar
+    )
+
+    if not coincidencias:
+        mostrar_error("No se encontró ningún préstamo con esos datos.")
+        return None
+
+    if len(coincidencias) == 1:
+        return coincidencias[0]
+
+    console.print(
+        "\n[yellow]Hay varios préstamos para ese usuario y ejemplar:[/yellow]"
+    )
+
+    tabla = Table(show_lines=True)
+    tabla.add_column("Fecha préstamo", style="cyan")
+    tabla.add_column("Fecha límite")
+    tabla.add_column("Estado")
+
+    for prestamo in coincidencias:
+        tabla.add_row(
+            str(prestamo.fecha_prestamo),
+            str(prestamo.fecha_limite),
+            prestamo.estado,
+        )
+
+    console.print(tabla)
+
+    fecha_prestamo = obtener_fecha("Fecha del préstamo a seleccionar")
+
+    if fecha_prestamo is None:
+        return None
+
+    for prestamo in coincidencias:
+        if prestamo.fecha_prestamo == fecha_prestamo:
+            return prestamo
+
+    mostrar_error("No se encontró un préstamo con esa fecha exacta.")
+    return None
 
 
 def obtener_fecha(mensaje):
@@ -555,80 +621,72 @@ def menu_categorias(categoria_crud):
 
         elif opcion == "3":
 
-            id_categoria = obtener_uuid("ID de la categoría")
+            nombre = Prompt.ask("Nombre de la categoría")
 
-            if id_categoria:
+            categoria = categoria_crud.obtener_por_nombre(nombre)
 
-                categoria = categoria_crud.obtener_por_id(id_categoria)
+            if categoria is None:
 
-                if categoria is None:
+                mostrar_error("Categoría no encontrada.")
 
-                    mostrar_error("Categoría no encontrada.")
+            else:
 
-                else:
-
-                    console.print(
-                        Panel(
-                            str(categoria),
-                            title="🏷️ Categoría encontrada",
-                            border_style="blue",
-                        )
+                console.print(
+                    Panel(
+                        str(categoria),
+                        title="🏷️ Categoría encontrada",
+                        border_style="blue",
                     )
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_categoria = obtener_uuid("ID de la categoría")
+            nombre = Prompt.ask("Nombre de la categoría")
 
-            if id_categoria:
+            categoria = categoria_crud.obtener_por_nombre(nombre)
 
-                categoria = categoria_crud.obtener_por_id(id_categoria)
+            if categoria is None:
 
-                if categoria is None:
+                mostrar_error("Categoría no encontrada.")
 
-                    mostrar_error("Categoría no encontrada.")
+            else:
 
-                else:
+                nuevo_nombre = Prompt.ask("Nombre", default=categoria.nombre)
 
-                    nombre = Prompt.ask("Nombre", default=categoria.nombre)
+                descripcion = Prompt.ask("Descripción", default=categoria.descripcion)
 
-                    descripcion = Prompt.ask(
-                        "Descripción", default=categoria.descripcion
-                    )
+                categoria_crud.actualizar(
+                    id_categoria=categoria.id_categoria,
+                    nombre=nuevo_nombre,
+                    descripcion=descripcion,
+                )
 
-                    categoria_crud.actualizar(
-                        id_categoria=id_categoria,
-                        nombre=nombre,
-                        descripcion=descripcion,
-                    )
-
-                    mostrar_exito("Categoría actualizada correctamente.")
+                mostrar_exito("Categoría actualizada correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_categoria = obtener_uuid("ID de la categoría")
+            nombre = Prompt.ask("Nombre de la categoría")
 
-            if id_categoria:
+            categoria = categoria_crud.obtener_por_nombre(nombre)
 
-                categoria = categoria_crud.obtener_por_id(id_categoria)
+            if categoria is None:
 
-                if categoria is None:
+                mostrar_error("Categoría no encontrada.")
 
-                    mostrar_error("Categoría no encontrada.")
+            else:
 
-                else:
+                confirmar = Confirm.ask("¿Está seguro de eliminar esta categoría?")
 
-                    confirmar = Confirm.ask("¿Está seguro de eliminar esta categoría?")
+                if confirmar:
 
-                    if confirmar:
-
-                        if categoria_crud.eliminar(id_categoria):
-                            mostrar_exito("Categoría eliminada correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar la categoría.")
+                    if categoria_crud.eliminar(categoria.id_categoria):
+                        mostrar_exito("Categoría eliminada correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar la categoría.")
 
             pausar()
 
@@ -721,87 +779,81 @@ def menu_editoriales(editorial_crud):
 
         elif opcion == "3":
 
-            id_editorial = obtener_uuid("ID de la editorial")
+            nombre = Prompt.ask("Nombre de la editorial")
 
-            if id_editorial:
+            editorial = editorial_crud.obtener_por_nombre(nombre)
 
-                editorial = editorial_crud.obtener_por_id(id_editorial)
+            if editorial is None:
 
-                if editorial is None:
+                mostrar_error("Editorial no encontrada.")
 
-                    mostrar_error("Editorial no encontrada.")
+            else:
 
-                else:
-
-                    console.print(
-                        Panel(
-                            str(editorial),
-                            title="🏢 Editorial encontrada",
-                            border_style="blue",
-                        )
+                console.print(
+                    Panel(
+                        str(editorial),
+                        title="🏢 Editorial encontrada",
+                        border_style="blue",
                     )
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_editorial = obtener_uuid("ID de la editorial")
+            nombre = Prompt.ask("Nombre de la editorial")
 
-            if id_editorial:
+            editorial = editorial_crud.obtener_por_nombre(nombre)
 
-                editorial = editorial_crud.obtener_por_id(id_editorial)
+            if editorial is None:
 
-                if editorial is None:
+                mostrar_error("Editorial no encontrada.")
 
-                    mostrar_error("Editorial no encontrada.")
+            else:
 
-                else:
+                nuevo_nombre = Prompt.ask("Nombre", default=editorial.nombre)
 
-                    nombre = Prompt.ask("Nombre", default=editorial.nombre)
+                pais = Prompt.ask("País", default=editorial.pais)
 
-                    pais = Prompt.ask("País", default=editorial.pais)
+                ciudad = Prompt.ask("Ciudad", default=editorial.ciudad)
 
-                    ciudad = Prompt.ask("Ciudad", default=editorial.ciudad)
+                telefono = Prompt.ask("Teléfono", default=editorial.telefono)
 
-                    telefono = Prompt.ask("Teléfono", default=editorial.telefono)
+                correo = Prompt.ask("Correo", default=editorial.correo)
 
-                    correo = Prompt.ask("Correo", default=editorial.correo)
+                editorial_crud.actualizar(
+                    id_editorial=editorial.id_editorial,
+                    nombre=nuevo_nombre,
+                    pais=pais,
+                    ciudad=ciudad,
+                    telefono=telefono,
+                    correo=correo,
+                )
 
-                    editorial_crud.actualizar(
-                        id_editorial=id_editorial,
-                        nombre=nombre,
-                        pais=pais,
-                        ciudad=ciudad,
-                        telefono=telefono,
-                        correo=correo,
-                    )
-
-                    mostrar_exito("Editorial actualizada correctamente.")
+                mostrar_exito("Editorial actualizada correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_editorial = obtener_uuid("ID de la editorial")
+            nombre = Prompt.ask("Nombre de la editorial")
 
-            if id_editorial:
+            editorial = editorial_crud.obtener_por_nombre(nombre)
 
-                editorial = editorial_crud.obtener_por_id(id_editorial)
+            if editorial is None:
 
-                if editorial is None:
+                mostrar_error("Editorial no encontrada.")
 
-                    mostrar_error("Editorial no encontrada.")
+            else:
 
-                else:
+                confirmar = Confirm.ask("¿Está seguro de eliminar esta editorial?")
 
-                    confirmar = Confirm.ask("¿Está seguro de eliminar esta editorial?")
+                if confirmar:
 
-                    if confirmar:
-
-                        if editorial_crud.eliminar(id_editorial):
-                            mostrar_exito("Editorial eliminada correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar la editorial.")
+                    if editorial_crud.eliminar(editorial.id_editorial):
+                        mostrar_exito("Editorial eliminada correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar la editorial.")
 
             pausar()
 
@@ -814,7 +866,7 @@ def menu_editoriales(editorial_crud):
 # ==========================================================
 
 
-def menu_libros(libro_crud):
+def menu_libros(libro_crud, categoria_crud, editorial_crud):
 
     while True:
 
@@ -846,14 +898,22 @@ def menu_libros(libro_crud):
                 pausar()
                 continue
 
-            idiomas = Prompt.ask("Idiomas")
+            idiomas = Prompt.ask("Idioma")
             descripcion = Prompt.ask("Descripción")
 
-            id_categoria = obtener_uuid("ID de la categoría")
+            nombre_categoria = Prompt.ask("Nombre de la categoría")
+            categoria = categoria_crud.obtener_por_nombre(nombre_categoria)
 
-            id_editorial = obtener_uuid("ID de la editorial")
+            if categoria is None:
+                mostrar_error("Categoría no encontrada.")
+                pausar()
+                continue
 
-            if id_categoria is None or id_editorial is None:
+            nombre_editorial = Prompt.ask("Nombre de la editorial")
+            editorial = editorial_crud.obtener_por_nombre(nombre_editorial)
+
+            if editorial is None:
+                mostrar_error("Editorial no encontrada.")
                 pausar()
                 continue
 
@@ -863,8 +923,8 @@ def menu_libros(libro_crud):
                 numero_paginas=numero_paginas,
                 idiomas=idiomas,
                 descripcion=descripcion,
-                id_categoria=id_categoria,
-                id_editorial=id_editorial,
+                id_categoria=categoria.id_categoria,
+                id_editorial=editorial.id_editorial,
             )
 
             mostrar_exito("Libro creado correctamente.")
@@ -895,14 +955,20 @@ def menu_libros(libro_crud):
 
                 for libro in libros:
 
+                    categoria = categoria_crud.obtener_por_id(libro.id_categoria)
+                    editorial = editorial_crud.obtener_por_id(libro.id_editorial)
+
+                    nombre_categoria = categoria.nombre if categoria else "—"
+                    nombre_editorial = editorial.nombre if editorial else "—"
+
                     tabla.add_row(
                         str(libro.id_libro),
                         libro.titulo,
                         str(libro.fecha_publicacion),
                         str(libro.numero_paginas),
                         libro.idiomas,
-                        str(libro.id_categoria),
-                        str(libro.id_editorial),
+                        nombre_categoria,
+                        nombre_editorial,
                     )
 
                 console.print(tabla)
@@ -911,97 +977,105 @@ def menu_libros(libro_crud):
 
         elif opcion == "3":
 
-            id_libro = obtener_uuid("ID del libro")
+            titulo = Prompt.ask("Título del libro")
 
-            if id_libro:
+            libro = libro_crud.obtener_por_titulo(titulo)
 
-                libro = libro_crud.obtener_por_id(id_libro)
+            if libro is None:
 
-                if libro is None:
+                mostrar_error("Libro no encontrado.")
 
-                    mostrar_error("Libro no encontrado.")
+            else:
 
-                else:
-
-                    console.print(
-                        Panel(
-                            str(libro), title="📖 Libro encontrado", border_style="blue"
-                        )
-                    )
+                console.print(
+                    Panel(str(libro), title="📖 Libro encontrado", border_style="blue")
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_libro = obtener_uuid("ID del libro")
+            titulo = Prompt.ask("Título del libro")
 
-            if id_libro:
+            libro = libro_crud.obtener_por_titulo(titulo)
 
-                libro = libro_crud.obtener_por_id(id_libro)
+            if libro is None:
 
-                if libro is None:
+                mostrar_error("Libro no encontrado.")
 
-                    mostrar_error("Libro no encontrado.")
+            else:
 
-                else:
+                nuevo_titulo = Prompt.ask("Título", default=libro.titulo)
 
-                    titulo = Prompt.ask("Título", default=libro.titulo)
+                fecha_publicacion = obtener_fecha("Nueva fecha de publicación")
 
-                    fecha_publicacion = obtener_fecha("Nueva fecha de publicación")
+                numero_paginas = obtener_entero("Número de páginas")
 
-                    numero_paginas = obtener_entero("Número de páginas")
+                if fecha_publicacion is not None and numero_paginas is not None:
 
-                    if fecha_publicacion is not None and numero_paginas is not None:
+                    idiomas = Prompt.ask("Idiomas", default=libro.idiomas)
 
-                        idiomas = Prompt.ask("Idiomas", default=libro.idiomas)
+                    descripcion = Prompt.ask("Descripción", default=libro.descripcion)
 
-                        descripcion = Prompt.ask(
-                            "Descripción", default=libro.descripcion
-                        )
+                    categoria_actual = categoria_crud.obtener_por_id(libro.id_categoria)
+                    nombre_categoria = Prompt.ask(
+                        "Nombre de la categoría",
+                        default=categoria_actual.nombre if categoria_actual else "",
+                    )
+                    categoria = categoria_crud.obtener_por_nombre(nombre_categoria)
 
-                        id_categoria = obtener_uuid("ID de la categoría")
+                    editorial_actual = editorial_crud.obtener_por_id(libro.id_editorial)
+                    nombre_editorial = Prompt.ask(
+                        "Nombre de la editorial",
+                        default=editorial_actual.nombre if editorial_actual else "",
+                    )
+                    editorial = editorial_crud.obtener_por_nombre(nombre_editorial)
 
-                        id_editorial = obtener_uuid("ID de la editorial")
+                    if categoria is None:
+                        mostrar_error("Categoría no encontrada.")
+                        pausar()
+                        continue
 
-                        if id_categoria and id_editorial:
+                    if editorial is None:
+                        mostrar_error("Editorial no encontrada.")
+                        pausar()
+                        continue
 
-                            libro_crud.actualizar(
-                                id_libro=id_libro,
-                                titulo=titulo,
-                                fecha_publicacion=fecha_publicacion,
-                                numero_paginas=numero_paginas,
-                                idiomas=idiomas,
-                                descripcion=descripcion,
-                                id_categoria=id_categoria,
-                                id_editorial=id_editorial,
-                            )
+                    libro_crud.actualizar(
+                        id_libro=libro.id_libro,
+                        titulo=nuevo_titulo,
+                        fecha_publicacion=fecha_publicacion,
+                        numero_paginas=numero_paginas,
+                        idiomas=idiomas,
+                        descripcion=descripcion,
+                        id_categoria=categoria.id_categoria,
+                        id_editorial=editorial.id_editorial,
+                    )
 
-                            mostrar_exito("Libro actualizado correctamente.")
+                    mostrar_exito("Libro actualizado correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_libro = obtener_uuid("ID del libro")
+            titulo = Prompt.ask("Título del libro")
 
-            if id_libro:
+            libro = libro_crud.obtener_por_titulo(titulo)
 
-                libro = libro_crud.obtener_por_id(id_libro)
+            if libro is None:
 
-                if libro is None:
+                mostrar_error("Libro no encontrado.")
 
-                    mostrar_error("Libro no encontrado.")
+            else:
 
-                else:
+                confirmar = Confirm.ask("¿Está seguro de eliminar este libro?")
 
-                    confirmar = Confirm.ask("¿Está seguro de eliminar este libro?")
+                if confirmar:
 
-                    if confirmar:
-
-                        if libro_crud.eliminar(id_libro):
-                            mostrar_exito("Libro eliminado correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar el libro.")
+                    if libro_crud.eliminar(libro.id_libro):
+                        mostrar_exito("Libro eliminado correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar el libro.")
 
             pausar()
 
@@ -1014,7 +1088,7 @@ def menu_libros(libro_crud):
 # ==========================================================
 
 
-def menu_ejemplares(ejemplar_crud):
+def menu_ejemplares(ejemplar_crud, libro_crud):
 
     while True:
 
@@ -1036,13 +1110,20 @@ def menu_ejemplares(ejemplar_crud):
 
         if opcion == "1":
 
-            id_libro = obtener_uuid("ID del libro")
+            titulo_libro = Prompt.ask("Título del libro")
+
+            libro = libro_crud.obtener_por_titulo(titulo_libro)
+
+            if libro is None:
+                mostrar_error("Libro no encontrado.")
+                pausar()
+                continue
 
             codigo_inventario = Prompt.ask("Código de inventario")
 
             fecha_adquisicion = obtener_fecha("Fecha de adquisición")
 
-            if id_libro is None or fecha_adquisicion is None:
+            if fecha_adquisicion is None:
                 pausar()
                 continue
 
@@ -1050,7 +1131,7 @@ def menu_ejemplares(ejemplar_crud):
             ubicacion = Prompt.ask("Ubicación")
 
             ejemplar = ejemplar_crud.crear(
-                id_libro=id_libro,
+                id_libro=libro.id_libro,
                 codigo_inventario=codigo_inventario,
                 fecha_adquisicion=fecha_adquisicion,
                 estado=estado,
@@ -1086,9 +1167,12 @@ def menu_ejemplares(ejemplar_crud):
 
                 for ejemplar in ejemplares:
 
+                    libro = libro_crud.obtener_por_id(ejemplar.id_libro)
+                    titulo_libro = libro.titulo if libro else "—"
+
                     tabla.add_row(
                         str(ejemplar.id_ejemplar),
-                        str(ejemplar.id_libro),
+                        titulo_libro,
                         ejemplar.codigo_inventario,
                         str(ejemplar.fecha_adquisicion),
                         ejemplar.estado,
@@ -1101,91 +1185,99 @@ def menu_ejemplares(ejemplar_crud):
 
         elif opcion == "3":
 
-            id_ejemplar = obtener_uuid("ID del ejemplar")
+            codigo_inventario = Prompt.ask("Código de inventario")
 
-            if id_ejemplar:
+            ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
 
-                ejemplar = ejemplar_crud.obtener_por_id(id_ejemplar)
+            if ejemplar is None:
 
-                if ejemplar is None:
+                mostrar_error("Ejemplar no encontrado.")
 
-                    mostrar_error("Ejemplar no encontrado.")
+            else:
 
-                else:
-
-                    console.print(
-                        Panel(
-                            str(ejemplar),
-                            title="📦 Ejemplar encontrado",
-                            border_style="blue",
-                        )
+                console.print(
+                    Panel(
+                        str(ejemplar),
+                        title="📦 Ejemplar encontrado",
+                        border_style="blue",
                     )
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_ejemplar = obtener_uuid("ID del ejemplar")
+            codigo_inventario = Prompt.ask("Código de inventario")
 
-            if id_ejemplar:
+            ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
 
-                ejemplar = ejemplar_crud.obtener_por_id(id_ejemplar)
+            if ejemplar is None:
 
-                if ejemplar is None:
+                mostrar_error("Ejemplar no encontrado.")
 
-                    mostrar_error("Ejemplar no encontrado.")
+            else:
 
-                else:
+                libro_actual = libro_crud.obtener_por_id(ejemplar.id_libro)
 
-                    id_libro = obtener_uuid("ID del libro")
+                titulo_libro = Prompt.ask(
+                    "Título del libro",
+                    default=libro_actual.titulo if libro_actual else "",
+                )
 
-                    codigo_inventario = Prompt.ask(
-                        "Código de inventario", default=ejemplar.codigo_inventario
-                    )
+                libro = libro_crud.obtener_por_titulo(titulo_libro)
 
-                    fecha_adquisicion = obtener_fecha("Fecha de adquisición")
+                if libro is None:
+                    mostrar_error("Libro no encontrado.")
+                    pausar()
+                    continue
 
-                    if id_libro and fecha_adquisicion:
+                nuevo_codigo = Prompt.ask(
+                    "Código de inventario", default=ejemplar.codigo_inventario
+                )
 
-                        estado = Prompt.ask("Estado", default=ejemplar.estado)
+                fecha_adquisicion = obtener_fecha("Fecha de adquisición")
 
-                        ubicacion = Prompt.ask("Ubicación", default=ejemplar.ubicacion)
+                if fecha_adquisicion is None:
+                    pausar()
+                    continue
 
-                        ejemplar_crud.actualizar(
-                            id_ejemplar=id_ejemplar,
-                            id_libro=id_libro,
-                            codigo_inventario=codigo_inventario,
-                            fecha_adquisicion=fecha_adquisicion,
-                            estado=estado,
-                            ubicacion=ubicacion,
-                        )
+                estado = Prompt.ask("Estado", default=ejemplar.estado)
 
-                        mostrar_exito("Ejemplar actualizado correctamente.")
+                ubicacion = Prompt.ask("Ubicación", default=ejemplar.ubicacion)
+
+                ejemplar_crud.actualizar(
+                    id_ejemplar=ejemplar.id_ejemplar,
+                    id_libro=libro.id_libro,
+                    codigo_inventario=nuevo_codigo,
+                    fecha_adquisicion=fecha_adquisicion,
+                    estado=estado,
+                    ubicacion=ubicacion,
+                )
+
+                mostrar_exito("Ejemplar actualizado correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_ejemplar = obtener_uuid("ID del ejemplar")
+            codigo_inventario = Prompt.ask("Código de inventario")
 
-            if id_ejemplar:
+            ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
 
-                ejemplar = ejemplar_crud.obtener_por_id(id_ejemplar)
+            if ejemplar is None:
 
-                if ejemplar is None:
+                mostrar_error("Ejemplar no encontrado.")
 
-                    mostrar_error("Ejemplar no encontrado.")
+            else:
 
-                else:
+                confirmar = Confirm.ask("¿Está seguro de eliminar este ejemplar?")
 
-                    confirmar = Confirm.ask("¿Está seguro de eliminar este ejemplar?")
+                if confirmar:
 
-                    if confirmar:
-
-                        if ejemplar_crud.eliminar(id_ejemplar):
-                            mostrar_exito("Ejemplar eliminado correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar el ejemplar.")
+                    if ejemplar_crud.eliminar(ejemplar.id_ejemplar):
+                        mostrar_exito("Ejemplar eliminado correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar el ejemplar.")
 
             pausar()
 
@@ -1198,7 +1290,7 @@ def menu_ejemplares(ejemplar_crud):
 # ==========================================================
 
 
-def menu_prestamos(prestamo_crud, usuario_crud):
+def menu_prestamos(prestamo_crud, usuario_crud, ejemplar_crud, libro_crud):
 
     while True:
 
@@ -1231,19 +1323,28 @@ def menu_prestamos(prestamo_crud, usuario_crud):
                 pausar()
                 continue
 
-            id_ejemplar = obtener_uuid("ID del ejemplar")
+            codigo_inventario = Prompt.ask("Código de inventario del ejemplar")
+
+            ejemplar = ejemplar_crud.obtener_por_codigo_inventario(codigo_inventario)
+
+            if ejemplar is None:
+
+                mostrar_error("Ejemplar no encontrado.")
+
+                pausar()
+                continue
 
             fecha_prestamo = obtener_fecha("Fecha del préstamo")
 
             fecha_limite = obtener_fecha("Fecha límite")
 
-            if id_ejemplar is None or fecha_prestamo is None or fecha_limite is None:
+            if fecha_prestamo is None or fecha_limite is None:
                 pausar()
                 continue
 
             prestamo = prestamo_crud.crear(
                 id_usuario=usuario.id_usuario,
-                id_ejemplar=id_ejemplar,
+                id_ejemplar=ejemplar.id_ejemplar,
                 fecha_prestamo=fecha_prestamo,
                 fecha_limite=fecha_limite,
             )
@@ -1278,10 +1379,27 @@ def menu_prestamos(prestamo_crud, usuario_crud):
 
                 for prestamo in prestamos:
 
+                    usuario = usuario_crud.obtener_por_id(prestamo.id_usuario)
+                    ejemplar = ejemplar_crud.obtener_por_id(prestamo.id_ejemplar)
+
+                    if usuario:
+                        texto_usuario = f"{usuario.documento} - {usuario.nombre}"
+                    else:
+                        texto_usuario = "—"
+
+                    if ejemplar:
+                        libro = libro_crud.obtener_por_id(ejemplar.id_libro)
+                        titulo_libro = libro.titulo if libro else "—"
+                        texto_ejemplar = (
+                            f"{ejemplar.codigo_inventario} - {titulo_libro}"
+                        )
+                    else:
+                        texto_ejemplar = "—"
+
                     tabla.add_row(
                         str(prestamo.id_prestamo),
-                        str(prestamo.id_usuario),
-                        str(prestamo.id_ejemplar),
+                        texto_usuario,
+                        texto_ejemplar,
                         str(prestamo.fecha_prestamo),
                         str(prestamo.fecha_limite),
                         str(prestamo.fecha_devolucion),
@@ -1294,112 +1412,90 @@ def menu_prestamos(prestamo_crud, usuario_crud):
 
         elif opcion == "3":
 
-            id_prestamo = obtener_uuid("ID del préstamo")
+            prestamo = buscar_prestamo_por_documento_y_codigo(
+                prestamo_crud, usuario_crud, ejemplar_crud
+            )
 
-            if id_prestamo:
+            if prestamo is not None:
 
-                prestamo = prestamo_crud.obtener_por_id(id_prestamo)
-
-                if prestamo is None:
-
-                    mostrar_error("Préstamo no encontrado.")
-
-                else:
-
-                    console.print(
-                        Panel(
-                            str(prestamo),
-                            title="🔄 Préstamo encontrado",
-                            border_style="blue",
-                        )
+                console.print(
+                    Panel(
+                        str(prestamo),
+                        title="🔄 Préstamo encontrado",
+                        border_style="blue",
                     )
+                )
 
             pausar()
 
         elif opcion == "4":
 
-            id_prestamo = obtener_uuid("ID del préstamo")
+            prestamo = buscar_prestamo_por_documento_y_codigo(
+                prestamo_crud, usuario_crud, ejemplar_crud
+            )
 
-            if id_prestamo:
+            if prestamo is not None:
 
-                prestamo = prestamo_crud.obtener_por_id(id_prestamo)
+                nueva_fecha_limite = obtener_fecha("Nueva fecha límite")
 
-                if prestamo is None:
+                if nueva_fecha_limite is None:
+                    pausar()
+                    continue
 
-                    mostrar_error("Préstamo no encontrado.")
+                texto_devolucion = Prompt.ask(
+                    "Fecha de devolución (AAAA-MM-DD, vacío si no se ha devuelto)",
+                    default="",
+                )
 
-                else:
+                fecha_devolucion = None
 
-                    id_usuario = obtener_uuid("ID del usuario")
+                if texto_devolucion.strip():
 
-                    id_ejemplar = obtener_uuid("ID del ejemplar")
+                    try:
 
-                    fecha_prestamo = obtener_fecha("Fecha del préstamo")
+                        fecha_devolucion = datetime.strptime(
+                            texto_devolucion, "%Y-%m-%d"
+                        ).date()
 
-                    fecha_limite = obtener_fecha("Fecha límite")
+                    except ValueError:
 
-                    if id_usuario and id_ejemplar and fecha_prestamo and fecha_limite:
+                        mostrar_error("Fecha de devolución inválida.")
 
-                        texto_devolucion = Prompt.ask(
-                            "Fecha de devolución (AAAA-MM-DD, vacío si no se ha devuelto)",
-                            default="",
-                        )
+                        pausar()
+                        continue
 
-                        fecha_devolucion = None
+                estado = Prompt.ask("Estado", default=prestamo.estado)
 
-                        if texto_devolucion.strip():
+                prestamo_crud.actualizar(
+                    id_prestamo=prestamo.id_prestamo,
+                    id_usuario=prestamo.id_usuario,
+                    id_ejemplar=prestamo.id_ejemplar,
+                    fecha_prestamo=prestamo.fecha_prestamo,
+                    fecha_limite=nueva_fecha_limite,
+                    fecha_devolucion=fecha_devolucion,
+                    estado=estado,
+                )
 
-                            try:
-
-                                fecha_devolucion = datetime.strptime(
-                                    texto_devolucion, "%Y-%m-%d"
-                                ).date()
-
-                            except ValueError:
-
-                                mostrar_error("Fecha de devolución inválida.")
-
-                                pausar()
-                                continue
-
-                        estado = Prompt.ask("Estado", default=prestamo.estado)
-
-                        prestamo_crud.actualizar(
-                            id_prestamo=id_prestamo,
-                            id_usuario=id_usuario,
-                            id_ejemplar=id_ejemplar,
-                            fecha_prestamo=fecha_prestamo,
-                            fecha_limite=fecha_limite,
-                            fecha_devolucion=fecha_devolucion,
-                            estado=estado,
-                        )
-
-                        mostrar_exito("Préstamo actualizado correctamente.")
+                mostrar_exito("Préstamo actualizado correctamente.")
 
             pausar()
 
         elif opcion == "5":
 
-            id_prestamo = obtener_uuid("ID del préstamo")
+            prestamo = buscar_prestamo_por_documento_y_codigo(
+                prestamo_crud, usuario_crud, ejemplar_crud
+            )
 
-            if id_prestamo:
+            if prestamo is not None:
 
-                prestamo = prestamo_crud.obtener_por_id(id_prestamo)
+                confirmar = Confirm.ask("¿Está seguro de eliminar este préstamo?")
 
-                if prestamo is None:
+                if confirmar:
 
-                    mostrar_error("Préstamo no encontrado.")
-
-                else:
-
-                    confirmar = Confirm.ask("¿Está seguro de eliminar este préstamo?")
-
-                    if confirmar:
-
-                        if prestamo_crud.eliminar(id_prestamo):
-                            mostrar_exito("Préstamo eliminado correctamente.")
-                        else:
-                            mostrar_error("No se pudo eliminar el préstamo.")
+                    if prestamo_crud.eliminar(prestamo.id_prestamo):
+                        mostrar_exito("Préstamo eliminado correctamente.")
+                    else:
+                        mostrar_error("No se pudo eliminar el préstamo.")
 
             pausar()
 
@@ -1418,7 +1514,7 @@ def menu_multas(multa_crud, prestamo_crud):
 
         console.clear()
 
-        mostrar_titulo("⚠️ MULTAS", "Gestión de multas")
+        mostrar_titulo("⚠️ MULTAS ", "Gestión de multas")
 
         console.print(" [cyan]1.[/cyan] ➕ Crear multa")
         console.print(" [cyan]2.[/cyan] 📋 Listar multas")
@@ -1484,7 +1580,7 @@ def menu_multas(multa_crud, prestamo_crud):
 
             mostrar_exito("Multa creada correctamente.")
 
-            console.print(Panel(str(multa), title="⚠️ Multa", border_style="green"))
+            console.print(Panel(str(multa), title="⚠️ Multa ", border_style="green"))
 
             pausar()
 
@@ -1653,6 +1749,17 @@ def main():
     prestamo_crud = PrestamoCrud()
     multa_crud = MultaCrud()
 
+    cargar_datos_prueba(
+        usuario_crud,
+        libro_crud,
+        autor_crud,
+        categoria_crud,
+        editorial_crud,
+        ejemplar_crud,
+        prestamo_crud,
+        multa_crud,
+    )
+
     while True:
 
         console.clear()
@@ -1698,8 +1805,7 @@ def main():
             menu_usuarios(usuario_crud)
 
         elif opcion == "2":
-
-            menu_libros(libro_crud)
+            menu_libros(libro_crud, categoria_crud, editorial_crud)
 
         elif opcion == "3":
 
@@ -1714,12 +1820,10 @@ def main():
             menu_editoriales(editorial_crud)
 
         elif opcion == "6":
-
-            menu_ejemplares(ejemplar_crud)
+            menu_ejemplares(ejemplar_crud, libro_crud)
 
         elif opcion == "7":
-
-            menu_prestamos(prestamo_crud, usuario_crud)
+            menu_prestamos(prestamo_crud, usuario_crud, ejemplar_crud, libro_crud)
 
         elif opcion == "8":
 
