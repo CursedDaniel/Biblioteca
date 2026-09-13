@@ -1,11 +1,13 @@
 import uuid
 
+from sqlalchemy.orm import Session
+
 from src.entities.editorial import Editorial
 
 
 class EditorialCrud:
-    def __init__(self):
-        self.editoriales: list[Editorial] = []
+    def __init__(self, session: Session):
+        self.session = session
 
     def crear(
         self,
@@ -16,37 +18,39 @@ class EditorialCrud:
         correo: str,
     ) -> Editorial:
         editorial = Editorial(
-            nombre=nombre,
-            pais=pais,
-            ciudad=ciudad,
-            telefono=telefono,
-            correo=correo,
+            nombre=nombre.strip(),
+            pais=pais.strip(),
+            ciudad=ciudad.strip(),
+            telefono=telefono.strip(),
+            correo=correo.strip(),
         )
 
-        self.editoriales.append(editorial)
+        self.session.add(editorial)
+        self.session.commit()
+        self.session.refresh(editorial)
+
         return editorial
 
     def obtener_por_id(
         self,
         id_editorial: uuid.UUID,
     ) -> Editorial | None:
-        for editorial in self.editoriales:
-            if editorial.id_editorial == id_editorial:
-                return editorial
+        return self.session.get(Editorial, id_editorial)
 
-        return None
+    def obtener_por_nombre(
+        self,
+        nombre: str,
+    ) -> Editorial | None:
+        nombre_normalizado = nombre.strip()
 
-    def obtener_por_nombre(self, nombre: str) -> Editorial | None:
-        nombre_normalizado = nombre.strip().lower()
-
-        for editorial in self.editoriales:
-            if editorial.nombre.lower() == nombre_normalizado:
-                return editorial
-
-        return None
+        return (
+            self.session.query(Editorial)
+            .filter(Editorial.nombre.ilike(nombre_normalizado))
+            .first()
+        )
 
     def obtener_todos(self) -> list[Editorial]:
-        return self.editoriales
+        return self.session.query(Editorial).all()
 
     def actualizar(
         self,
@@ -68,6 +72,9 @@ class EditorialCrud:
         editorial.telefono = telefono.strip()
         editorial.correo = correo.strip()
 
+        self.session.commit()
+        self.session.refresh(editorial)
+
         return editorial
 
     def eliminar(self, id_editorial: uuid.UUID) -> bool:
@@ -76,5 +83,7 @@ class EditorialCrud:
         if editorial is None:
             return False
 
-        self.editoriales.remove(editorial)
+        self.session.delete(editorial)
+        self.session.commit()
+
         return True
