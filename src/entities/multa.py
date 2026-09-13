@@ -1,25 +1,31 @@
 import uuid
-from datetime import date
+
+from sqlalchemy import Column, Date, ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
+from src.database.database import Base
 
 
-class Multa:
-    def __init__(
-        self,
-        fecha_prestamo: date,
-        fecha_limite: date,
-        fecha_devolucion: date | None,
-        estado: str,
-        id_multa: uuid.UUID | None = None,
-        id_prestamo: uuid.UUID | None = None,
-        id_ejemplar: uuid.UUID | None = None,
-    ):
-        self.id_multa = id_multa if id_multa is not None else uuid.uuid4()
-        self.fecha_prestamo = fecha_prestamo
-        self.fecha_limite = fecha_limite
-        self.fecha_devolucion = fecha_devolucion
-        self.estado = estado.strip()
-        self.id_prestamo = id_prestamo
-        self.id_ejemplar = id_ejemplar
+class Multa(Base):
+    __tablename__ = "multas"
+
+    id_multa = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    fecha_prestamo = Column(Date, nullable=False)
+    fecha_limite = Column(Date, nullable=False)
+    fecha_devolucion = Column(Date, nullable=True)
+    estado = Column(String(20), nullable=False)
+
+    id_prestamo = Column(
+        UUID(as_uuid=True), ForeignKey("prestamos.id_prestamo"), nullable=False
+    )
+    id_ejemplar = Column(
+        UUID(as_uuid=True), ForeignKey("ejemplares.id_ejemplar"), nullable=False
+    )
+
+    prestamo = relationship("Prestamo")
+    ejemplar = relationship("Ejemplar")
 
     def __str__(self) -> str:
         return (
