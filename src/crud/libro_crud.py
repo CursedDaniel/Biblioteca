@@ -1,70 +1,114 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Session
 
-from src.database.database import Base
-from src.database.libro_autor import libro_autor
+from src.entities.libro import Libro
 
 
-class Libro(Base):
-    __tablename__ = "libros"
+class LibroCrud:
+    def crear(
+        self,
+        session: Session,
+        titulo: str,
+        fecha_publicacion: date,
+        numero_paginas: int,
+        idiomas: str,
+        descripcion: str,
+        id_categoria: uuid.UUID,
+        id_editorial: uuid.UUID,
+    ) -> Libro:
 
-    id_libro = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
-
-    titulo = Column(String(200), nullable=False)
-    fecha_publicacion = Column(Date, nullable=False)
-    numero_paginas = Column(Integer, nullable=False)
-    idiomas = Column(String(100), nullable=False)
-    descripcion = Column(Text, nullable=False)
-
-    id_categoria = Column(
-        UUID(as_uuid=True),
-        ForeignKey("categorias.id_categoria"),
-        nullable=False,
-    )
-
-    id_editorial = Column(
-        UUID(as_uuid=True),
-        ForeignKey("editoriales.id_editorial"),
-        nullable=False,
-    )
-
-    categoria = relationship(
-        "Categoria",
-        back_populates="libros",
-    )
-
-    editorial = relationship(
-        "Editorial",
-        back_populates="libros",
-    )
-
-    autores = relationship(
-        "Autor",
-        secondary=libro_autor,
-        back_populates="libros",
-    )
-
-    ejemplares = relationship(
-        "Ejemplar",
-        back_populates="libro",
-    )
-
-    def __str__(self) -> str:
-        return (
-            f"ID: {self.id_libro}\n"
-            f"Título: {self.titulo}\n"
-            f"Fecha de publicación: {self.fecha_publicacion}\n"
-            f"Número de páginas: {self.numero_paginas}\n"
-            f"Idiomas: {self.idiomas}\n"
-            f"Descripción: {self.descripcion}\n"
-            f"ID Categoría: {self.id_categoria}\n"
-            f"ID Editorial: {self.id_editorial}"
+        libro = Libro(
+            titulo=titulo,
+            fecha_publicacion=fecha_publicacion,
+            numero_paginas=numero_paginas,
+            idiomas=idiomas,
+            descripcion=descripcion,
+            id_categoria=id_categoria,
+            id_editorial=id_editorial,
         )
+
+        session.add(libro)
+        session.commit()
+        session.refresh(libro)
+
+        return libro
+
+    def obtener_por_id(
+        self,
+        session: Session,
+        id_libro: uuid.UUID,
+    ) -> Libro | None:
+
+        return session.get(Libro, id_libro)
+
+    def obtener_por_titulo(
+        self,
+        session: Session,
+        titulo: str,
+    ) -> Libro | None:
+
+        titulo_normalizado = titulo.strip().lower()
+
+        libros = session.query(Libro).all()
+
+        for libro in libros:
+            if libro.titulo.strip().lower() == titulo_normalizado:
+                return libro
+
+        return None
+
+    def obtener_todos(
+        self,
+        session: Session,
+    ) -> list[Libro]:
+
+        return session.query(Libro).all()
+
+    def actualizar(
+        self,
+        session: Session,
+        id_libro: uuid.UUID,
+        titulo: str,
+        fecha_publicacion: date,
+        numero_paginas: int,
+        idiomas: str,
+        descripcion: str,
+        id_categoria: uuid.UUID,
+        id_editorial: uuid.UUID,
+    ) -> Libro | None:
+
+        libro = self.obtener_por_id(session, id_libro)
+
+        if libro is None:
+            return None
+
+        libro.titulo = titulo.strip()
+        libro.fecha_publicacion = fecha_publicacion
+        libro.numero_paginas = numero_paginas
+        libro.idiomas = idiomas.strip()
+        libro.descripcion = descripcion.strip()
+        libro.id_categoria = id_categoria
+        libro.id_editorial = id_editorial
+
+        session.commit()
+        session.refresh(libro)
+
+        return libro
+
+    def eliminar(
+        self,
+        session: Session,
+        id_libro: uuid.UUID,
+    ) -> bool:
+
+        libro = self.obtener_por_id(session, id_libro)
+
+        if libro is None:
+            return False
+
+        session.delete(libro)
+        session.commit()
+
+        return True
