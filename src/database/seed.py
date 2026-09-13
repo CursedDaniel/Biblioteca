@@ -37,6 +37,30 @@ USUARIOS_SEED = [
         "telefono": "3003334455",
         "estado": "suspendido",
     },
+    {
+        "nombre": "Andrés",
+        "apellido": "Ramírez",
+        "documento": "1001001004",
+        "correo": "andres@example.com",
+        "telefono": "3004445566",
+        "estado": "activo",
+    },
+    {
+        "nombre": "Sofía",
+        "apellido": "Torres",
+        "documento": "1001001005",
+        "correo": "sofia@example.com",
+        "telefono": "3005556677",
+        "estado": "activo",
+    },
+    {
+        "nombre": "Mateo",
+        "apellido": "Herrera",
+        "documento": "1001001006",
+        "correo": "mateo@example.com",
+        "telefono": "3006667788",
+        "estado": "suspendido",
+    },
 ]
 
 
@@ -55,6 +79,34 @@ AUTORES_SEED = [
         "nacionalidad": "Británica",
         "biografia": "Escritor y periodista británico conocido por 1984 y Rebelión en la granja.",
     },
+    {
+        "nombre": "J.K.",
+        "apellido": "Rowling",
+        "fecha_nacimiento": date(1965, 7, 31),
+        "nacionalidad": "Británica",
+        "biografia": "Autora británica conocida por la serie de libros de Harry Potter.",
+    },
+    {
+        "nombre": "J.R.R.",
+        "apellido": "Tolkien",
+        "fecha_nacimiento": date(1892, 1, 3),
+        "nacionalidad": "Británica",
+        "biografia": "Escritor británico conocido por El Señor de los Anillos y El Hobbit.",
+    },
+    {
+        "nombre": "Isaac",
+        "apellido": "Asimov",
+        "fecha_nacimiento": date(1920, 1, 2),
+        "nacionalidad": "Estadounidense",
+        "biografia": "Escritor y divulgador científico especializado en ciencia ficción.",
+    },
+    {
+        "nombre": "Julio",
+        "apellido": "Verne",
+        "fecha_nacimiento": date(1828, 2, 8),
+        "nacionalidad": "Francesa",
+        "biografia": "Escritor francés considerado uno de los padres de la ciencia ficción.",
+    },
 ]
 
 
@@ -70,6 +122,18 @@ CATEGORIAS_SEED = [
     {
         "nombre": "Fantasía",
         "descripcion": "Obras que incorporan elementos mágicos o sobrenaturales.",
+    },
+    {
+        "nombre": "Misterio",
+        "descripcion": "Obras centradas en la resolución de un crimen o enigma.",
+    },
+    {
+        "nombre": "Romance",
+        "descripcion": "Obras que exploran relaciones amorosas y emocionales.",
+    },
+    {
+        "nombre": "Historia",
+        "descripcion": "Obras que relatan eventos históricos o biografías.",
     },
 ]
 
@@ -88,6 +152,13 @@ EDITORIALES_SEED = [
         "ciudad": "Nueva York",
         "telefono": "2127829000",
         "correo": "contacto@penguinrandomhouse.com",
+    },
+    {
+        "nombre": "HarperCollins",
+        "pais": "Estados Unidos",
+        "ciudad": "Nueva York",
+        "telefono": "2122077000",
+        "correo": "contacto@harpercollins.com",
     },
 ]
 
