@@ -1,5 +1,4 @@
 import uuid
-from datetime import date
 
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
@@ -31,9 +30,11 @@ class Libro(Base):
         UUID(as_uuid=True), ForeignKey("editoriales.id_editorial"), nullable=False
     )
 
-    categoria = relationship("Categoria")
+    categoria = relationship("Categoria", back_populates="libros")
 
-    editorial = relationship("Editorial")
+    editorial = relationship("Editorial", back_populates="libros")
+
+    ejemplares = relationship("Ejemplar", back_populates="libro")
 
     def __str__(self) -> str:
         return (
