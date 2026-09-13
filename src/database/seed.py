@@ -1,6 +1,6 @@
 import uuid
 from datetime import date, timedelta
-
+from sqlalchemy import or_
 from src.database.database import Base, engine, SessionLocal
 
 from src.entities.usuario import Usuario
@@ -168,7 +168,14 @@ def seed_usuarios(session):
 
     for datos in USUARIOS_SEED:
         existente = (
-            session.query(Usuario).filter_by(documento=datos["documento"]).first()
+            session.query(Usuario)
+            .filter(
+                or_(
+                    Usuario.documento == datos["documento"],
+                    Usuario.correo == datos["correo"],
+                )
+            )
+            .first()
         )
 
         if existente:
