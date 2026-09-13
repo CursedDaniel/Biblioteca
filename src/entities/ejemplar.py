@@ -24,7 +24,10 @@ class Ejemplar(Base):
     ubicacion = Column(String(100), nullable=False)
 
     libro = relationship("Libro", back_populates="ejemplares")
+
     prestamos = relationship("Prestamo", back_populates="ejemplar")
+
+    multas = relationship("Multa", back_populates="ejemplar")
 
     def __str__(self) -> str:
         return (
