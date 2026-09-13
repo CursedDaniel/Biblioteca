@@ -1,23 +1,28 @@
 import uuid
-from datetime import date
+
+from sqlalchemy import Column, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
+from src.database.database import Base
 
 
-class Editorial:
-    def __init__(
-        self,
-        nombre: str,
-        pais: str,
-        ciudad: str,
-        correo: str,
-        telefono: str,
-        id_editorial: uuid.UUID | None = None,
-    ):
-        self.id_editorial = id_editorial if id_editorial is not None else uuid.uuid4()
-        self.nombre = nombre.strip()
-        self.pais = pais.strip()
-        self.ciudad = ciudad.strip()
-        self.correo = correo.strip()
-        self.telefono = telefono.strip()
+class Editorial(Base):
+    __tablename__ = "editoriales"
+
+    id_editorial = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    nombre = Column(String(150), nullable=False)
+    pais = Column(String(80), nullable=False)
+    ciudad = Column(String(80), nullable=False)
+    correo = Column(String(150), nullable=False)
+    telefono = Column(String(30), nullable=False)
+
+    libros = relationship("Libro", back_populates="editorial")
 
     def __str__(self) -> str:
         return (
