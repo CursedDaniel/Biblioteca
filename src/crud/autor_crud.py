@@ -1,13 +1,11 @@
 import uuid
-
 from datetime import date
-
 from sqlalchemy.orm import Session
-
 from src.entities.autor import Autor
 
 
 class AutorCrud:
+
     def __init__(self, session: Session):
         self.session = session
 
@@ -33,10 +31,7 @@ class AutorCrud:
 
         return autor
 
-    def obtener_por_id(
-        self,
-        id_autor: uuid.UUID,
-    ) -> Autor | None:
+    def obtener_por_id(self, id_autor: uuid.UUID) -> Autor | None:
         return self.session.get(Autor, id_autor)
 
     def obtener_todos(self) -> list[Autor]:
