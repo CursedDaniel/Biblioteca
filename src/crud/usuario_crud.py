@@ -1,13 +1,11 @@
 import uuid
-
 from datetime import date
-
 from sqlalchemy.orm import Session
-
 from src.entities.usuario import Usuario
 
 
 class UsuarioCrud:
+
     def __init__(self, session: Session):
         self.session = session
 
@@ -37,16 +35,10 @@ class UsuarioCrud:
 
         return usuario
 
-    def obtener_por_id(
-        self,
-        id_usuario: uuid.UUID,
-    ) -> Usuario | None:
+    def obtener_por_id(self, id_usuario: uuid.UUID) -> Usuario | None:
         return self.session.get(Usuario, id_usuario)
 
-    def obtener_por_documento(
-        self,
-        documento: str,
-    ) -> Usuario | None:
+    def obtener_por_documento(self, documento: str) -> Usuario | None:
         documento_normalizado = documento.strip()
 
         return (
