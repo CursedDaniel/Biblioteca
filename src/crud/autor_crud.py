@@ -1,12 +1,13 @@
 import uuid
 from datetime import date
-
+from sqlalchemy.orm import Session
 from src.entities.autor import Autor
 
 
 class AutorCrud:
-    def __init__(self):
-        self.autores: list[Autor] = []
+
+    def __init__(self, session: Session):
+        self.session = session
 
     def crear(
         self,
@@ -17,28 +18,24 @@ class AutorCrud:
         biografia: str,
     ) -> Autor:
         autor = Autor(
-            nombre=nombre,
-            apellido=apellido,
+            nombre=nombre.strip(),
+            apellido=apellido.strip(),
             fecha_nacimiento=fecha_nacimiento,
-            nacionalidad=nacionalidad,
-            biografia=biografia,
+            nacionalidad=nacionalidad.strip(),
+            biografia=biografia.strip(),
         )
 
-        self.autores.append(autor)
+        self.session.add(autor)
+        self.session.commit()
+        self.session.refresh(autor)
+
         return autor
 
-    def obtener_por_id(
-        self,
-        id_autor: uuid.UUID,
-    ) -> Autor | None:
-        for autor in self.autores:
-            if autor.id_autor == id_autor:
-                return autor
-
-        return None
+    def obtener_por_id(self, id_autor: uuid.UUID) -> Autor | None:
+        return self.session.get(Autor, id_autor)
 
     def obtener_todos(self) -> list[Autor]:
-        return self.autores
+        return self.session.query(Autor).all()
 
     def actualizar(
         self,
@@ -60,6 +57,9 @@ class AutorCrud:
         autor.nacionalidad = nacionalidad.strip()
         autor.biografia = biografia.strip()
 
+        self.session.commit()
+        self.session.refresh(autor)
+
         return autor
 
     def eliminar(self, id_autor: uuid.UUID) -> bool:
@@ -68,5 +68,7 @@ class AutorCrud:
         if autor is None:
             return False
 
-        self.autores.remove(autor)
+        self.session.delete(autor)
+        self.session.commit()
+
         return True

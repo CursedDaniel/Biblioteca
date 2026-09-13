@@ -1,12 +1,14 @@
 import uuid
 from datetime import date
 
+from sqlalchemy.orm import Session
+
 from src.entities.multa import Multa
 
 
 class MultaCrud:
-    def __init__(self):
-        self.multas: list[Multa] = []
+    def __init__(self, session: Session):
+        self.session = session
 
     def crear(
         self,
@@ -23,24 +25,20 @@ class MultaCrud:
             fecha_prestamo=fecha_prestamo,
             fecha_limite=fecha_limite,
             fecha_devolucion=fecha_devolucion,
-            estado=estado,
+            estado=estado.strip(),
         )
 
-        self.multas.append(multa)
+        self.session.add(multa)
+        self.session.commit()
+        self.session.refresh(multa)
+
         return multa
 
-    def obtener_por_id(
-        self,
-        id_multa: uuid.UUID,
-    ) -> Multa | None:
-        for multa in self.multas:
-            if multa.id_multa == id_multa:
-                return multa
-
-        return None
+    def obtener_por_id(self, id_multa: uuid.UUID) -> Multa | None:
+        return self.session.get(Multa, id_multa)
 
     def obtener_todos(self) -> list[Multa]:
-        return self.multas
+        return self.session.query(Multa).all()
 
     def actualizar(
         self,
@@ -64,6 +62,9 @@ class MultaCrud:
         multa.fecha_devolucion = fecha_devolucion
         multa.estado = estado.strip()
 
+        self.session.commit()
+        self.session.refresh(multa)
+
         return multa
 
     def eliminar(self, id_multa: uuid.UUID) -> bool:
@@ -72,5 +73,7 @@ class MultaCrud:
         if multa is None:
             return False
 
-        self.multas.remove(multa)
+        self.session.delete(multa)
+        self.session.commit()
+
         return True
