@@ -23,9 +23,8 @@ class Multa(Base):
     id_ejemplar = Column(
         UUID(as_uuid=True), ForeignKey("ejemplares.id_ejemplar"), nullable=False
     )
-
+    ejemplar = relationship("Ejemplar", back_populates="multas")
     prestamo = relationship("Prestamo")
-    ejemplar = relationship("Ejemplar")
 
     def __str__(self) -> str:
         return (
