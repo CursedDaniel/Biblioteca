@@ -3,8 +3,10 @@ from datetime import date
 
 from sqlalchemy import Column, Date, String, Text
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
 from src.database.database import Base
+from src.database.libro_autor import libro_autor
 
 
 class Autor(Base):
@@ -18,6 +20,8 @@ class Autor(Base):
     nacionalidad = Column(String(100), nullable=False)
     biografia = Column(Text, nullable=False)
 
+    libros = relationship("Libro", secondary=libro_autor, back_populates="autores")
+
     def __str__(self) -> str:
         return (
             f"ID: {self.id_autor}\n"
@@ -27,3 +31,4 @@ class Autor(Base):
             f"Nacionalidad: {self.nacionalidad}\n"
             f"Biografía: {self.biografia}"
         )
+
