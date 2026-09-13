@@ -1,27 +1,39 @@
 import uuid
 from datetime import date
 
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
-class Libro:
-    def __init__(
-        self,
-        titulo: str,
-        fecha_publicacion: date,
-        numero_paginas: str,
-        idiomas: str,
-        descripcion: str,
-        id_categoria: str,
-        id_editorial: str,
-        id_libro: uuid.UUID | None = None,
-    ):
-        self.id_libro = id_libro if id_libro is not None else uuid.uuid4()
-        self.titulo = titulo
-        self.fecha_publicacion = fecha_publicacion
-        self.numero_paginas = numero_paginas
-        self.idiomas = idiomas
-        self.descripcion = descripcion
-        self.id_categoria = id_categoria
-        self.id_editorial = id_editorial
+from src.database.database import Base
+
+
+class Libro(Base):
+    __tablename__ = "libros"
+
+    id_libro = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    titulo = Column(String(200), nullable=False)
+
+    fecha_publicacion = Column(Date, nullable=False)
+
+    numero_paginas = Column(Integer, nullable=False)
+
+    idiomas = Column(String(100), nullable=False)
+
+    descripcion = Column(Text, nullable=False)
+
+    id_categoria = Column(
+        UUID(as_uuid=True), ForeignKey("categorias.id_categoria"), nullable=False
+    )
+
+    id_editorial = Column(
+        UUID(as_uuid=True), ForeignKey("editoriales.id_editorial"), nullable=False
+    )
+
+    categoria = relationship("Categoria")
+
+    editorial = relationship("Editorial")
 
     def __str__(self) -> str:
         return (
