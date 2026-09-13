@@ -1,11 +1,10 @@
 import uuid
-
 from sqlalchemy.orm import Session
-
 from src.entities.editorial import Editorial
 
 
 class EditorialCrud:
+
     def __init__(self, session: Session):
         self.session = session
 
@@ -31,16 +30,10 @@ class EditorialCrud:
 
         return editorial
 
-    def obtener_por_id(
-        self,
-        id_editorial: uuid.UUID,
-    ) -> Editorial | None:
+    def obtener_por_id(self, id_editorial: uuid.UUID) -> Editorial | None:
         return self.session.get(Editorial, id_editorial)
 
-    def obtener_por_nombre(
-        self,
-        nombre: str,
-    ) -> Editorial | None:
+    def obtener_por_nombre(self, nombre: str) -> Editorial | None:
         nombre_normalizado = nombre.strip()
 
         return (
