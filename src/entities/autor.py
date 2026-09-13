@@ -9,6 +9,17 @@ from src.database.database import Base
 from src.database.libro_autor import libro_autor
 
 
+import uuid
+from datetime import date
+
+from sqlalchemy import Column, Date, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
+from src.database.database import Base
+from src.database.libro_autor import libro_autor
+
+
 class Autor(Base):
     __tablename__ = "autores"
 
@@ -31,4 +42,3 @@ class Autor(Base):
             f"Nacionalidad: {self.nacionalidad}\n"
             f"Biografía: {self.biografia}"
         )
-

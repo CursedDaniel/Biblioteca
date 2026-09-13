@@ -14,22 +14,30 @@ class Libro(Base):
     id_libro = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     titulo = Column(String(200), nullable=False)
+
     fecha_publicacion = Column(Date, nullable=False)
+
     numero_paginas = Column(Integer, nullable=False)
+
     idiomas = Column(String(100), nullable=False)
+
     descripcion = Column(Text, nullable=False)
 
     id_categoria = Column(
         UUID(as_uuid=True), ForeignKey("categorias.id_categoria"), nullable=False
     )
+
     id_editorial = Column(
         UUID(as_uuid=True), ForeignKey("editoriales.id_editorial"), nullable=False
     )
 
     categoria = relationship("Categoria", back_populates="libros")
+
     editorial = relationship("Editorial", back_populates="libros")
-    ejemplares = relationship("Ejemplar", back_populates="libro")
+
     autores = relationship("Autor", secondary=libro_autor, back_populates="libros")
+
+    ejemplares = relationship("Ejemplar", back_populates="libro")
 
     def __str__(self) -> str:
         return (
