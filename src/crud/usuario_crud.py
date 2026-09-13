@@ -1,12 +1,13 @@
 import uuid
 from datetime import date
-
+from sqlalchemy.orm import Session
 from src.entities.usuario import Usuario
 
 
 class UsuarioCrud:
-    def __init__(self):
-        self.usuarios: list[Usuario] = []
+
+    def __init__(self, session: Session):
+        self.session = session
 
     def crear(
         self,
@@ -19,36 +20,35 @@ class UsuarioCrud:
         estado: str,
     ) -> Usuario:
         usuario = Usuario(
-            nombre=nombre,
-            apellido=apellido,
-            documento=documento,
-            correo=correo,
-            telefono=telefono,
+            nombre=nombre.strip(),
+            apellido=apellido.strip(),
+            documento=documento.strip(),
+            correo=correo.strip(),
+            telefono=telefono.strip(),
             fecha_registro=fecha_registro,
-            estado=estado,
+            estado=estado.strip(),
         )
 
-        self.usuarios.append(usuario)
+        self.session.add(usuario)
+        self.session.commit()
+        self.session.refresh(usuario)
+
         return usuario
 
-    def obtener_por_id(
-        self,
-        id_usuario: uuid.UUID,
-    ) -> Usuario | None:
-        for usuario in self.usuarios:
-            if usuario.id_usuario == id_usuario:
-                return usuario
+    def obtener_por_id(self, id_usuario: uuid.UUID) -> Usuario | None:
+        return self.session.get(Usuario, id_usuario)
 
-        return None
+    def obtener_por_documento(self, documento: str) -> Usuario | None:
+        documento_normalizado = documento.strip()
 
-    def obtener_por_documento(self, documento):
-        for usuario in self.usuarios:
-            if usuario.documento == documento:
-                return usuario
-        return None
+        return (
+            self.session.query(Usuario)
+            .filter(Usuario.documento == documento_normalizado)
+            .first()
+        )
 
     def obtener_todos(self) -> list[Usuario]:
-        return self.usuarios
+        return self.session.query(Usuario).all()
 
     def actualizar(
         self,
@@ -74,6 +74,9 @@ class UsuarioCrud:
         usuario.fecha_registro = fecha_registro
         usuario.estado = estado.strip()
 
+        self.session.commit()
+        self.session.refresh(usuario)
+
         return usuario
 
     def eliminar(self, id_usuario: uuid.UUID) -> bool:
@@ -82,5 +85,7 @@ class UsuarioCrud:
         if usuario is None:
             return False
 
-        self.usuarios.remove(usuario)
+        self.session.delete(usuario)
+        self.session.commit()
+
         return True

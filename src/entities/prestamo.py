@@ -1,25 +1,36 @@
 import uuid
-from datetime import date
+
+from sqlalchemy import Column, Date, ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
+from src.database.database import Base
 
 
-class Prestamo:
-    def __init__(
-        self,
-        id_usuario: uuid.UUID,
-        id_ejemplar: uuid.UUID,
-        fecha_prestamo: date,
-        fecha_limite: date,
-        fecha_devolucion: date | None = None,
-        estado: str = "activo",
-        id_prestamo: uuid.UUID | None = None,
-    ):
-        self.id_prestamo = id_prestamo if id_prestamo is not None else uuid.uuid4()
-        self.id_usuario = id_usuario
-        self.id_ejemplar = id_ejemplar
-        self.fecha_prestamo = fecha_prestamo
-        self.fecha_limite = fecha_limite
-        self.fecha_devolucion = fecha_devolucion
-        self.estado = estado.strip()
+class Prestamo(Base):
+    __tablename__ = "prestamos"
+
+    id_prestamo = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    id_usuario = Column(
+        UUID(as_uuid=True), ForeignKey("usuarios.id_usuario"), nullable=False
+    )
+
+    id_ejemplar = Column(
+        UUID(as_uuid=True), ForeignKey("ejemplares.id_ejemplar"), nullable=False
+    )
+
+    fecha_prestamo = Column(Date, nullable=False)
+
+    fecha_limite = Column(Date, nullable=False)
+
+    fecha_devolucion = Column(Date, nullable=True)
+
+    estado = Column(String(30), nullable=False, default="activo")
+
+    usuario = relationship("Usuario", back_populates="prestamos")
+
+    ejemplar = relationship("Ejemplar", back_populates="prestamos")
 
     def __str__(self) -> str:
         return (

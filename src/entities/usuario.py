@@ -1,29 +1,33 @@
 import uuid
 from datetime import date
 
+from sqlalchemy import Column, Date, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
-class Usuario:
-    def __init__(
-        self,
-        nombre: str,
-        apellido: str,
-        documento: str,
-        correo: str,
-        telefono: str,
-        fecha_registro: date | None = None,
-        estado: str = "activo",
-        id_usuario: uuid.UUID | None = None,
-    ):
-        self.id_usuario = id_usuario if id_usuario is not None else uuid.uuid4()
-        self.nombre = nombre.strip()
-        self.apellido = apellido.strip()
-        self.documento = documento.strip()
-        self.correo = correo.strip()
-        self.telefono = telefono.strip()
-        self.fecha_registro = (
-            fecha_registro if fecha_registro is not None else date.today()
-        )
-        self.estado = estado.strip()
+from src.database.database import Base
+
+
+class Usuario(Base):
+    __tablename__ = "usuarios"
+
+    id_usuario = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    nombre = Column(String(100), nullable=False)
+
+    apellido = Column(String(100), nullable=False)
+
+    documento = Column(String(30), nullable=False, unique=True)
+
+    correo = Column(String(150), nullable=False, unique=True)
+
+    telefono = Column(String(30), nullable=False)
+
+    fecha_registro = Column(Date, nullable=False, default=date.today)
+
+    estado = Column(String(20), nullable=False, default="activo")
+
+    prestamos = relationship("Prestamo", back_populates="usuario")
 
     def __str__(self) -> str:
         return (

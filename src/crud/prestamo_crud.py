@@ -1,12 +1,14 @@
 import uuid
 from datetime import date
 
+from sqlalchemy.orm import Session
+
 from src.entities.prestamo import Prestamo
 
 
 class PrestamoCrud:
-    def __init__(self):
-        self.prestamos: list[Prestamo] = []
+    def __init__(self, session: Session):
+        self.session = session
 
     def crear(
         self,
@@ -23,35 +25,34 @@ class PrestamoCrud:
             fecha_prestamo=fecha_prestamo,
             fecha_limite=fecha_limite,
             fecha_devolucion=fecha_devolucion,
-            estado=estado,
+            estado=estado.strip(),
         )
 
-        self.prestamos.append(prestamo)
+        self.session.add(prestamo)
+        self.session.commit()
+        self.session.refresh(prestamo)
+
         return prestamo
 
-    def obtener_por_id(
-        self,
-        id_prestamo: uuid.UUID,
-    ) -> Prestamo | None:
-        for prestamo in self.prestamos:
-            if prestamo.id_prestamo == id_prestamo:
-                return prestamo
-
-        return None
+    def obtener_por_id(self, id_prestamo: uuid.UUID) -> Prestamo | None:
+        return self.session.get(Prestamo, id_prestamo)
 
     def obtener_todos(self) -> list[Prestamo]:
-        return self.prestamos
+        return self.session.query(Prestamo).all()
 
     def obtener_por_usuario_y_ejemplar(
         self,
         id_usuario: uuid.UUID,
         id_ejemplar: uuid.UUID,
     ) -> list[Prestamo]:
-        return [
-            prestamo
-            for prestamo in self.prestamos
-            if prestamo.id_usuario == id_usuario and prestamo.id_ejemplar == id_ejemplar
-        ]
+        return (
+            self.session.query(Prestamo)
+            .filter(
+                Prestamo.id_usuario == id_usuario,
+                Prestamo.id_ejemplar == id_ejemplar,
+            )
+            .all()
+        )
 
     def actualizar(
         self,
@@ -75,6 +76,9 @@ class PrestamoCrud:
         prestamo.fecha_devolucion = fecha_devolucion
         prestamo.estado = estado.strip()
 
+        self.session.commit()
+        self.session.refresh(prestamo)
+
         return prestamo
 
     def eliminar(self, id_prestamo: uuid.UUID) -> bool:
@@ -83,5 +87,8 @@ class PrestamoCrud:
         if prestamo is None:
             return False
 
-        self.prestamos.remove(prestamo)
+        self.session.delete(prestamo)
+        self.session.commit()
+
         return True
+        
