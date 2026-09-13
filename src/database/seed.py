@@ -216,7 +216,7 @@ def seed_editoriales(session):
     return editoriales
 
 
-def seed_libros(session, categorias, editoriales):
+def seed_libros(session, categorias, editoriales, autores):
     libros = {}
 
     datos_libros = [
@@ -228,6 +228,7 @@ def seed_libros(session, categorias, editoriales):
             "descripcion": "Novela sobre la familia Buendía y Macondo.",
             "categoria": "Novela",
             "editorial": "Editorial Planeta",
+            "autor": "García Márquez",
         },
         {
             "titulo": "1984",
@@ -237,6 +238,7 @@ def seed_libros(session, categorias, editoriales):
             "descripcion": "Novela distópica sobre una sociedad totalitaria.",
             "categoria": "Ciencia ficción",
             "editorial": "Penguin Random House",
+            "autor": "Orwell",
         },
     ]
 
@@ -250,6 +252,7 @@ def seed_libros(session, categorias, editoriales):
 
         categoria = categorias[datos["categoria"]]
         editorial = editoriales[datos["editorial"]]
+        autor = autores[datos["autor"]]
 
         libro = Libro(
             titulo=datos["titulo"],
@@ -260,6 +263,8 @@ def seed_libros(session, categorias, editoriales):
             id_categoria=categoria.id_categoria,
             id_editorial=editorial.id_editorial,
         )
+
+        libro.autores.append(autor)
 
         session.add(libro)
         session.flush()
@@ -408,7 +413,7 @@ def seed():
         usuarios = seed_usuarios(session)
 
         print("\nSembrando autores...")
-        seed_autores(session)
+        autores = seed_autores(session)
 
         print("\nSembrando categorías...")
         categorias = seed_categorias(session)
@@ -421,6 +426,7 @@ def seed():
             session,
             categorias,
             editoriales,
+            autores,
         )
 
         print("\nSembrando ejemplares...")
