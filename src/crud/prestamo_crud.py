@@ -1,66 +1,111 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import Column, Date, ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Session
 
-from src.database.database import Base
+from src.entities.prestamo import Prestamo
 
 
-class Prestamo(Base):
-    __tablename__ = "prestamos"
+class PrestamoCrud:
+    def crear(
+        self,
+        session: Session,
+        id_usuario: uuid.UUID,
+        id_ejemplar: uuid.UUID,
+        fecha_prestamo: date,
+        fecha_limite: date,
+        fecha_devolucion: date | None = None,
+        estado: str = "activo",
+    ) -> Prestamo:
 
-    id_prestamo = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
-
-    id_usuario = Column(
-        UUID(as_uuid=True),
-        ForeignKey("usuarios.id_usuario"),
-        nullable=False,
-    )
-
-    id_ejemplar = Column(
-        UUID(as_uuid=True),
-        ForeignKey("ejemplares.id_ejemplar"),
-        nullable=False,
-    )
-
-    fecha_prestamo = Column(Date, nullable=False)
-    fecha_limite = Column(Date, nullable=False)
-    fecha_devolucion = Column(Date, nullable=True)
-    estado = Column(
-        String(20),
-        nullable=False,
-        default="activo",
-    )
-
-    usuario = relationship(
-        "Usuario",
-        back_populates="prestamos",
-    )
-
-    ejemplar = relationship(
-        "Ejemplar",
-        back_populates="prestamos",
-    )
-
-    multas = relationship(
-        "Multa",
-        back_populates="prestamo",
-    )
-
-    def __str__(self) -> str:
-        return (
-            f"ID: {self.id_prestamo}\n"
-            f"ID Usuario: {self.id_usuario}\n"
-            f"ID Ejemplar: {self.id_ejemplar}\n"
-            f"Fecha de préstamo: {self.fecha_prestamo}\n"
-            f"Fecha límite: {self.fecha_limite}\n"
-            f"Fecha de devolución: {self.fecha_devolucion}\n"
-            f"Estado: {self.estado}"
+        prestamo = Prestamo(
+            id_usuario=id_usuario,
+            id_ejemplar=id_ejemplar,
+            fecha_prestamo=fecha_prestamo,
+            fecha_limite=fecha_limite,
+            fecha_devolucion=fecha_devolucion,
+            estado=estado,
         )
+
+        session.add(prestamo)
+        session.commit()
+        session.refresh(prestamo)
+
+        return prestamo
+
+    def obtener_por_id(
+        self,
+        session: Session,
+        id_prestamo: uuid.UUID,
+    ) -> Prestamo | None:
+
+        return session.get(Prestamo, id_prestamo)
+
+    def obtener_todos(
+        self,
+        session: Session,
+    ) -> list[Prestamo]:
+
+        return session.query(Prestamo).all()
+
+    def obtener_por_usuario_y_ejemplar(
+        self,
+        session: Session,
+        id_usuario: uuid.UUID,
+        id_ejemplar: uuid.UUID,
+    ) -> list[Prestamo]:
+
+        return (
+            session.query(Prestamo)
+            .filter(
+                Prestamo.id_usuario == id_usuario,
+                Prestamo.id_ejemplar == id_ejemplar,
+            )
+            .all()
+        )
+
+    def actualizar(
+        self,
+        session: Session,
+        id_prestamo: uuid.UUID,
+        id_usuario: uuid.UUID,
+        id_ejemplar: uuid.UUID,
+        fecha_prestamo: date,
+        fecha_limite: date,
+        fecha_devolucion: date | None,
+        estado: str,
+    ) -> Prestamo | None:
+
+        prestamo = self.obtener_por_id(session, id_prestamo)
+
+        if prestamo is None:
+            return None
+
+        prestamo.id_usuario = id_usuario
+        prestamo.id_ejemplar = id_ejemplar
+        prestamo.fecha_prestamo = fecha_prestamo
+        prestamo.fecha_limite = fecha_limite
+        prestamo.fecha_devolucion = fecha_devolucion
+        prestamo.estado = estado.strip()
+
+        session.commit()
+        session.refresh(prestamo)
+
+        return prestamo
+
+    def eliminar(
+        self,
+        session: Session,
+        id_prestamo: uuid.UUID,
+    ) -> bool:
+
+        prestamo = self.obtener_por_id(session, id_prestamo)
+
+        if prestamo is None:
+            return False
+
+        session.delete(prestamo)
+        session.commit()
+
+        return True
         
