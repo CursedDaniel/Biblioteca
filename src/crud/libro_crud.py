@@ -7,9 +7,11 @@ from src.entities.libro import Libro
 
 
 class LibroCrud:
+    def __init__(self, session: Session):
+        self.session = session
+
     def crear(
         self,
-        session: Session,
         titulo: str,
         fecha_publicacion: date,
         numero_paginas: int,
@@ -18,57 +20,39 @@ class LibroCrud:
         id_categoria: uuid.UUID,
         id_editorial: uuid.UUID,
     ) -> Libro:
-
         libro = Libro(
-            titulo=titulo,
+            titulo=titulo.strip(),
             fecha_publicacion=fecha_publicacion,
             numero_paginas=numero_paginas,
-            idiomas=idiomas,
-            descripcion=descripcion,
+            idiomas=idiomas.strip(),
+            descripcion=descripcion.strip(),
             id_categoria=id_categoria,
             id_editorial=id_editorial,
         )
 
-        session.add(libro)
-        session.commit()
-        session.refresh(libro)
+        self.session.add(libro)
+        self.session.commit()
+        self.session.refresh(libro)
 
         return libro
 
-    def obtener_por_id(
-        self,
-        session: Session,
-        id_libro: uuid.UUID,
-    ) -> Libro | None:
+    def obtener_por_id(self, id_libro: uuid.UUID) -> Libro | None:
+        return self.session.get(Libro, id_libro)
 
-        return session.get(Libro, id_libro)
+    def obtener_por_titulo(self, titulo: str) -> Libro | None:
+        titulo_normalizado = titulo.strip()
 
-    def obtener_por_titulo(
-        self,
-        session: Session,
-        titulo: str,
-    ) -> Libro | None:
+        return (
+            self.session.query(Libro)
+            .filter(Libro.titulo.ilike(titulo_normalizado))
+            .first()
+        )
 
-        titulo_normalizado = titulo.strip().lower()
-
-        libros = session.query(Libro).all()
-
-        for libro in libros:
-            if libro.titulo.strip().lower() == titulo_normalizado:
-                return libro
-
-        return None
-
-    def obtener_todos(
-        self,
-        session: Session,
-    ) -> list[Libro]:
-
-        return session.query(Libro).all()
+    def obtener_todos(self) -> list[Libro]:
+        return self.session.query(Libro).all()
 
     def actualizar(
         self,
-        session: Session,
         id_libro: uuid.UUID,
         titulo: str,
         fecha_publicacion: date,
@@ -78,8 +62,7 @@ class LibroCrud:
         id_categoria: uuid.UUID,
         id_editorial: uuid.UUID,
     ) -> Libro | None:
-
-        libro = self.obtener_por_id(session, id_libro)
+        libro = self.obtener_por_id(id_libro)
 
         if libro is None:
             return None
@@ -92,23 +75,18 @@ class LibroCrud:
         libro.id_categoria = id_categoria
         libro.id_editorial = id_editorial
 
-        session.commit()
-        session.refresh(libro)
+        self.session.commit()
+        self.session.refresh(libro)
 
         return libro
 
-    def eliminar(
-        self,
-        session: Session,
-        id_libro: uuid.UUID,
-    ) -> bool:
-
-        libro = self.obtener_por_id(session, id_libro)
+    def eliminar(self, id_libro: uuid.UUID) -> bool:
+        libro = self.obtener_por_id(id_libro)
 
         if libro is None:
             return False
 
-        session.delete(libro)
-        session.commit()
+        self.session.delete(libro)
+        self.session.commit()
 
         return True
