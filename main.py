@@ -9,26 +9,16 @@ from rich.prompt import Prompt, Confirm
 
 from src.crud.libro_crud import LibroCrud
 from src.crud.ejemplar_crud import EjemplarCrud
-from src.crud.libro_crud import LibroCrud
 from src.crud.usuario_crud import UsuarioCrud
-from src.crud.libro_crud import LibroCrud
 from src.crud.autor_crud import AutorCrud
 from src.crud.categoria_crud import CategoriaCrud
 from src.crud.editorial_crud import EditorialCrud
-from src.crud.ejemplar_crud import EjemplarCrud
 from src.crud.prestamo_crud import PrestamoCrud
 from src.crud.multa_crud import MultaCrud
 
-from src.crud.categoria_crud import CategoriaCrud
-from src.crud.multa_crud import MultaCrud
-from datos_prueba import cargar_datos_prueba
+from src.database.database import Base, SessionLocal, engine
 
 console = Console()
-
-
-# ==========================================================
-# FUNCIONES GENERALES
-# ==========================================================
 
 
 def pausar():
@@ -142,11 +132,6 @@ def obtener_entero(mensaje):
     except ValueError:
         mostrar_error("Debe ingresar un número entero.")
         return None
-
-
-# ==========================================================
-# USUARIOS
-# ==========================================================
 
 
 def menu_usuarios(usuario_crud):
@@ -1733,32 +1718,20 @@ def menu_multas(multa_crud, prestamo_crud):
             break
 
 
-# ==========================================================
-# MENÚ PRINCIPAL
-# ==========================================================
-
-
 def main():
 
-    usuario_crud = UsuarioCrud()
-    libro_crud = LibroCrud()
-    autor_crud = AutorCrud()
-    categoria_crud = CategoriaCrud()
-    editorial_crud = EditorialCrud()
-    ejemplar_crud = EjemplarCrud()
-    prestamo_crud = PrestamoCrud()
-    multa_crud = MultaCrud()
+    Base.metadata.create_all(engine)
 
-    cargar_datos_prueba(
-        usuario_crud,
-        libro_crud,
-        autor_crud,
-        categoria_crud,
-        editorial_crud,
-        ejemplar_crud,
-        prestamo_crud,
-        multa_crud,
-    )
+    session = SessionLocal()
+
+    usuario_crud = UsuarioCrud(session)
+    libro_crud = LibroCrud(session)
+    autor_crud = AutorCrud(session)
+    categoria_crud = CategoriaCrud(session)
+    editorial_crud = EditorialCrud(session)
+    ejemplar_crud = EjemplarCrud(session)
+    prestamo_crud = PrestamoCrud(session)
+    multa_crud = MultaCrud(session)
 
     while True:
 
