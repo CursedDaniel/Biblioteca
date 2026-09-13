@@ -1,60 +1,94 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import Column, Date, ForeignKey, String
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Session
 
-from src.database.database import Base
+from src.entities.multa import Multa
 
 
-class Multa(Base):
-    __tablename__ = "multas"
+class MultaCrud:
+    def crear(
+        self,
+        session: Session,
+        id_prestamo: uuid.UUID,
+        id_ejemplar: uuid.UUID,
+        fecha_prestamo: date,
+        fecha_limite: date,
+        fecha_devolucion: date | None = None,
+        estado: str = "pendiente",
+    ) -> Multa:
 
-    id_multa = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
-
-    id_prestamo = Column(
-        UUID(as_uuid=True),
-        ForeignKey("prestamos.id_prestamo"),
-        nullable=False,
-    )
-
-    id_ejemplar = Column(
-        UUID(as_uuid=True),
-        ForeignKey("ejemplares.id_ejemplar"),
-        nullable=False,
-    )
-
-    fecha_prestamo = Column(Date, nullable=False)
-    fecha_limite = Column(Date, nullable=False)
-    fecha_devolucion = Column(Date, nullable=True)
-    estado = Column(
-        String(20),
-        nullable=False,
-        default="pendiente",
-    )
-
-    prestamo = relationship(
-        "Prestamo",
-        back_populates="multas",
-    )
-
-    ejemplar = relationship(
-        "Ejemplar",
-        back_populates="multas",
-    )
-
-    def __str__(self) -> str:
-        return (
-            f"ID: {self.id_multa}\n"
-            f"ID Préstamo: {self.id_prestamo}\n"
-            f"ID Ejemplar: {self.id_ejemplar}\n"
-            f"Fecha de préstamo: {self.fecha_prestamo}\n"
-            f"Fecha límite: {self.fecha_limite}\n"
-            f"Fecha de devolución: {self.fecha_devolucion}\n"
-            f"Estado: {self.estado}"
+        multa = Multa(
+            id_prestamo=id_prestamo,
+            id_ejemplar=id_ejemplar,
+            fecha_prestamo=fecha_prestamo,
+            fecha_limite=fecha_limite,
+            fecha_devolucion=fecha_devolucion,
+            estado=estado,
         )
+
+        session.add(multa)
+        session.commit()
+        session.refresh(multa)
+
+        return multa
+
+    def obtener_por_id(
+        self,
+        session: Session,
+        id_multa: uuid.UUID,
+    ) -> Multa | None:
+
+        return session.get(Multa, id_multa)
+
+    def obtener_todos(
+        self,
+        session: Session,
+    ) -> list[Multa]:
+
+        return session.query(Multa).all()
+
+    def actualizar(
+        self,
+        session: Session,
+        id_multa: uuid.UUID,
+        id_prestamo: uuid.UUID,
+        id_ejemplar: uuid.UUID,
+        fecha_prestamo: date,
+        fecha_limite: date,
+        fecha_devolucion: date | None,
+        estado: str,
+    ) -> Multa | None:
+
+        multa = self.obtener_por_id(session, id_multa)
+
+        if multa is None:
+            return None
+
+        multa.id_prestamo = id_prestamo
+        multa.id_ejemplar = id_ejemplar
+        multa.fecha_prestamo = fecha_prestamo
+        multa.fecha_limite = fecha_limite
+        multa.fecha_devolucion = fecha_devolucion
+        multa.estado = estado.strip()
+
+        session.commit()
+        session.refresh(multa)
+
+        return multa
+
+    def eliminar(
+        self,
+        session: Session,
+        id_multa: uuid.UUID,
+    ) -> bool:
+
+        multa = self.obtener_por_id(session, id_multa)
+
+        if multa is None:
+            return False
+
+        session.delete(multa)
+        session.commit()
+
+        return True
