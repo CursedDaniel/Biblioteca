@@ -1,6 +1,7 @@
 # **Biblioteca**
 
 Sistema para la gestión de **préstamos de material académico y libros** de una biblioteca.
+## VIDEO PARCIAL 2: https://youtu.be/FL4dW0rIJI4
 
 ## **Integrantes**
 
