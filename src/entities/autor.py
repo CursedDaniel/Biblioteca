@@ -1,24 +1,22 @@
 import uuid
 from datetime import date
 
+from sqlalchemy import Column, Date, String, Text
+from sqlalchemy.dialects.postgresql import UUID
 
-class Autor:
-    def __init__(
-        self,
-        nombre: str,
-        apellido: str,
-        fecha_nacimiento: date,
-        nacionalidad: str,
-        biografia: str,
-        id_autor: uuid.UUID | None = None,
-    ):
+from src.database.database import Base
 
-        self.id_autor = id_autor if id_autor is not None else uuid.uuid4()
-        self.nombre = nombre.strip()
-        self.apellido = apellido.strip()
-        self.fecha_nacimiento = fecha_nacimiento
-        self.nacionalidad = nacionalidad.strip()
-        self.biografia = biografia.strip()
+
+class Autor(Base):
+    __tablename__ = "autores"
+
+    id_autor = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    nombre = Column(String(100), nullable=False)
+    apellido = Column(String(100), nullable=False)
+    fecha_nacimiento = Column(Date, nullable=False)
+    nacionalidad = Column(String(100), nullable=False)
+    biografia = Column(Text, nullable=False)
 
     def __str__(self) -> str:
         return (
