@@ -1,87 +1,66 @@
 import uuid
 from datetime import date
 
-from src.entities.prestamo import Prestamo
+from sqlalchemy import Column, Date, ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
+from src.database.database import Base
 
 
-class PrestamoCrud:
-    def __init__(self):
-        self.prestamos: list[Prestamo] = []
+class Prestamo(Base):
+    __tablename__ = "prestamos"
 
-    def crear(
-        self,
-        id_usuario: uuid.UUID,
-        id_ejemplar: uuid.UUID,
-        fecha_prestamo: date,
-        fecha_limite: date,
-        fecha_devolucion: date | None = None,
-        estado: str = "activo",
-    ) -> Prestamo:
-        prestamo = Prestamo(
-            id_usuario=id_usuario,
-            id_ejemplar=id_ejemplar,
-            fecha_prestamo=fecha_prestamo,
-            fecha_limite=fecha_limite,
-            fecha_devolucion=fecha_devolucion,
-            estado=estado,
+    id_prestamo = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    id_usuario = Column(
+        UUID(as_uuid=True),
+        ForeignKey("usuarios.id_usuario"),
+        nullable=False,
+    )
+
+    id_ejemplar = Column(
+        UUID(as_uuid=True),
+        ForeignKey("ejemplares.id_ejemplar"),
+        nullable=False,
+    )
+
+    fecha_prestamo = Column(Date, nullable=False)
+    fecha_limite = Column(Date, nullable=False)
+    fecha_devolucion = Column(Date, nullable=True)
+    estado = Column(
+        String(20),
+        nullable=False,
+        default="activo",
+    )
+
+    usuario = relationship(
+        "Usuario",
+        back_populates="prestamos",
+    )
+
+    ejemplar = relationship(
+        "Ejemplar",
+        back_populates="prestamos",
+    )
+
+    multas = relationship(
+        "Multa",
+        back_populates="prestamo",
+    )
+
+    def __str__(self) -> str:
+        return (
+            f"ID: {self.id_prestamo}\n"
+            f"ID Usuario: {self.id_usuario}\n"
+            f"ID Ejemplar: {self.id_ejemplar}\n"
+            f"Fecha de préstamo: {self.fecha_prestamo}\n"
+            f"Fecha límite: {self.fecha_limite}\n"
+            f"Fecha de devolución: {self.fecha_devolucion}\n"
+            f"Estado: {self.estado}"
         )
-
-        self.prestamos.append(prestamo)
-        return prestamo
-
-    def obtener_por_id(
-        self,
-        id_prestamo: uuid.UUID,
-    ) -> Prestamo | None:
-        for prestamo in self.prestamos:
-            if prestamo.id_prestamo == id_prestamo:
-                return prestamo
-
-        return None
-
-    def obtener_todos(self) -> list[Prestamo]:
-        return self.prestamos
-
-    def obtener_por_usuario_y_ejemplar(
-        self,
-        id_usuario: uuid.UUID,
-        id_ejemplar: uuid.UUID,
-    ) -> list[Prestamo]:
-        return [
-            prestamo
-            for prestamo in self.prestamos
-            if prestamo.id_usuario == id_usuario and prestamo.id_ejemplar == id_ejemplar
-        ]
-
-    def actualizar(
-        self,
-        id_prestamo: uuid.UUID,
-        id_usuario: uuid.UUID,
-        id_ejemplar: uuid.UUID,
-        fecha_prestamo: date,
-        fecha_limite: date,
-        fecha_devolucion: date | None,
-        estado: str,
-    ) -> Prestamo | None:
-        prestamo = self.obtener_por_id(id_prestamo)
-
-        if prestamo is None:
-            return None
-
-        prestamo.id_usuario = id_usuario
-        prestamo.id_ejemplar = id_ejemplar
-        prestamo.fecha_prestamo = fecha_prestamo
-        prestamo.fecha_limite = fecha_limite
-        prestamo.fecha_devolucion = fecha_devolucion
-        prestamo.estado = estado.strip()
-
-        return prestamo
-
-    def eliminar(self, id_prestamo: uuid.UUID) -> bool:
-        prestamo = self.obtener_por_id(id_prestamo)
-
-        if prestamo is None:
-            return False
-
-        self.prestamos.remove(prestamo)
-        return True
+        

@@ -1,89 +1,70 @@
 import uuid
 from datetime import date
 
-from src.entities.libro import Libro
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+
+from src.database.database import Base
+from src.database.libro_autor import libro_autor
 
 
-class LibroCrud:
-    def __init__(self):
-        self.libros: list[Libro] = []
+class Libro(Base):
+    __tablename__ = "libros"
 
-    def crear(
-        self,
-        titulo: str,
-        fecha_publicacion: date,
-        numero_paginas: int,
-        idiomas: str,
-        descripcion: str,
-        id_categoria: uuid.UUID,
-        id_editorial: uuid.UUID,
-    ) -> Libro:
-        libro = Libro(
-            titulo=titulo,
-            fecha_publicacion=fecha_publicacion,
-            numero_paginas=numero_paginas,
-            idiomas=idiomas,
-            descripcion=descripcion,
-            id_categoria=id_categoria,
-            id_editorial=id_editorial,
+    id_libro = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    titulo = Column(String(200), nullable=False)
+    fecha_publicacion = Column(Date, nullable=False)
+    numero_paginas = Column(Integer, nullable=False)
+    idiomas = Column(String(100), nullable=False)
+    descripcion = Column(Text, nullable=False)
+
+    id_categoria = Column(
+        UUID(as_uuid=True),
+        ForeignKey("categorias.id_categoria"),
+        nullable=False,
+    )
+
+    id_editorial = Column(
+        UUID(as_uuid=True),
+        ForeignKey("editoriales.id_editorial"),
+        nullable=False,
+    )
+
+    categoria = relationship(
+        "Categoria",
+        back_populates="libros",
+    )
+
+    editorial = relationship(
+        "Editorial",
+        back_populates="libros",
+    )
+
+    autores = relationship(
+        "Autor",
+        secondary=libro_autor,
+        back_populates="libros",
+    )
+
+    ejemplares = relationship(
+        "Ejemplar",
+        back_populates="libro",
+    )
+
+    def __str__(self) -> str:
+        return (
+            f"ID: {self.id_libro}\n"
+            f"Título: {self.titulo}\n"
+            f"Fecha de publicación: {self.fecha_publicacion}\n"
+            f"Número de páginas: {self.numero_paginas}\n"
+            f"Idiomas: {self.idiomas}\n"
+            f"Descripción: {self.descripcion}\n"
+            f"ID Categoría: {self.id_categoria}\n"
+            f"ID Editorial: {self.id_editorial}"
         )
-
-        self.libros.append(libro)
-        return libro
-
-    def obtener_por_id(
-        self,
-        id_libro: uuid.UUID,
-    ) -> Libro | None:
-        for libro in self.libros:
-            if libro.id_libro == id_libro:
-                return libro
-
-        return None
-
-    def obtener_por_titulo(self, titulo: str) -> Libro | None:
-        titulo_normalizado = titulo.strip().lower()
-
-        for libro in self.libros:
-            if libro.titulo.strip().lower() == titulo_normalizado:
-                return libro
-
-        return None
-
-    def obtener_todos(self) -> list[Libro]:
-        return self.libros
-
-    def actualizar(
-        self,
-        id_libro: uuid.UUID,
-        titulo: str,
-        fecha_publicacion: date,
-        numero_paginas: int,
-        idiomas: str,
-        descripcion: str,
-        id_categoria: uuid.UUID,
-        id_editorial: uuid.UUID,
-    ) -> Libro | None:
-        libro = self.obtener_por_id(id_libro)
-
-        if libro is None:
-            return None
-
-        libro.titulo = titulo.strip()
-        libro.fecha_publicacion = fecha_publicacion
-        libro.numero_paginas = numero_paginas
-        libro.idiomas = idiomas.strip()
-        libro.descripcion = descripcion.strip()
-        libro.id_categoria = id_categoria
-        libro.id_editorial = id_editorial
-
-        return libro
-
-    def eliminar(self, id_libro: uuid.UUID) -> bool:
-        libro = self.obtener_por_id(id_libro)
-
-        if libro is None:
-            return False
-
-        self.libros.remove(libro)
-        return True
