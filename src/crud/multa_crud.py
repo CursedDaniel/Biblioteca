@@ -7,9 +7,11 @@ from src.entities.multa import Multa
 
 
 class MultaCrud:
+    def __init__(self, session: Session):
+        self.session = session
+
     def crear(
         self,
-        session: Session,
         id_prestamo: uuid.UUID,
         id_ejemplar: uuid.UUID,
         fecha_prestamo: date,
@@ -17,40 +19,29 @@ class MultaCrud:
         fecha_devolucion: date | None = None,
         estado: str = "pendiente",
     ) -> Multa:
-
         multa = Multa(
             id_prestamo=id_prestamo,
             id_ejemplar=id_ejemplar,
             fecha_prestamo=fecha_prestamo,
             fecha_limite=fecha_limite,
             fecha_devolucion=fecha_devolucion,
-            estado=estado,
+            estado=estado.strip(),
         )
 
-        session.add(multa)
-        session.commit()
-        session.refresh(multa)
+        self.session.add(multa)
+        self.session.commit()
+        self.session.refresh(multa)
 
         return multa
 
-    def obtener_por_id(
-        self,
-        session: Session,
-        id_multa: uuid.UUID,
-    ) -> Multa | None:
+    def obtener_por_id(self, id_multa: uuid.UUID) -> Multa | None:
+        return self.session.get(Multa, id_multa)
 
-        return session.get(Multa, id_multa)
-
-    def obtener_todos(
-        self,
-        session: Session,
-    ) -> list[Multa]:
-
-        return session.query(Multa).all()
+    def obtener_todos(self) -> list[Multa]:
+        return self.session.query(Multa).all()
 
     def actualizar(
         self,
-        session: Session,
         id_multa: uuid.UUID,
         id_prestamo: uuid.UUID,
         id_ejemplar: uuid.UUID,
@@ -59,8 +50,7 @@ class MultaCrud:
         fecha_devolucion: date | None,
         estado: str,
     ) -> Multa | None:
-
-        multa = self.obtener_por_id(session, id_multa)
+        multa = self.obtener_por_id(id_multa)
 
         if multa is None:
             return None
@@ -72,23 +62,18 @@ class MultaCrud:
         multa.fecha_devolucion = fecha_devolucion
         multa.estado = estado.strip()
 
-        session.commit()
-        session.refresh(multa)
+        self.session.commit()
+        self.session.refresh(multa)
 
         return multa
 
-    def eliminar(
-        self,
-        session: Session,
-        id_multa: uuid.UUID,
-    ) -> bool:
-
-        multa = self.obtener_por_id(session, id_multa)
+    def eliminar(self, id_multa: uuid.UUID) -> bool:
+        multa = self.obtener_por_id(id_multa)
 
         if multa is None:
             return False
 
-        session.delete(multa)
-        session.commit()
+        self.session.delete(multa)
+        self.session.commit()
 
         return True
