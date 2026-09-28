@@ -35,7 +35,11 @@ def crear_autor(payload: AutorCreate, crud: AutorCrud = Depends(get_crud)):
 @router.get("/", response_model=AutorList)
 def listar_autores(crud: AutorCrud = Depends(get_crud)):
     autores = crud.obtener_todos()
-    return {"data": autores, "status": 200, "message": "Autores obtenidos correctamente"}
+    return {
+        "data": autores,
+        "status": 200,
+        "message": "Autores obtenidos correctamente",
+    }
 
 
 @router.get("/{id_autor}", response_model=AutorPostResponse)
