@@ -2,14 +2,14 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.autores import autores_router
-from src.api.categorias import categorias_router
-from src.api.editoriales import editoriales_router
-from src.api.ejemplares import ejemplares_router
-from src.api.libros import libros_router
-from src.api.multas import multas_router
-from src.api.prestamos import prestamos_router
-from src.api.usuarios import usuarios_router
+from src.api.routers.autor import router as autores_router
+from src.api.routers.categoria import router as categorias_router
+from src.api.routers.editorial import router as editoriales_router
+from src.api.routers.ejemplar import router as ejemplares_router
+from src.api.routers.libro import router as libros_router
+from src.api.routers.multa import router as multas_router
+from src.api.routers.prestamo import router as prestamos_router
+from src.api.routers.usuario import router as usuarios_router
 
 app = FastAPI(
     title="API Biblioteca — Programación de Software 2026-2",
