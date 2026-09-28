@@ -1,7 +1,7 @@
 from datetime import date
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict  # pyright: ignore[reportMissingImports]
 
 
 class UsuarioCreate(BaseModel):
