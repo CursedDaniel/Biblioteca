@@ -35,3 +35,22 @@ class UsuarioRead(BaseModel):
     telefono: str
     fecha_registro: date
     estado: str
+
+
+class UsuarioPost(BaseModel):
+
+    data: UsuarioRead
+    status: int
+    message: str
+
+
+class UsuarioList(BaseModel):
+    data: list[UsuarioRead]
+    status: int
+    message: str
+
+
+class UsuarioPut(BaseModel):
+    data: UsuarioRead
+    status: int
+    message: str
