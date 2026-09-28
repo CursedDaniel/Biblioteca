@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.crud.prestamo import PrestamoCrud
+from src.crud.prestamo_crud import PrestamoCrud
 from src.database.connection import get_session
-from src.schemas.prestamo import (
+from src.api.schemas.prestamo import (
     PrestamoCreate,
     PrestamoList,
     PrestamoPost,

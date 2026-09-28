@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.crud.categoria import CategoriaCrud
+from src.crud.categoria_crud import CategoriaCrud
 from src.database.connection import get_session
-from src.schemas.categoria import (
+from src.api.schemas.categoria import (
     CategoriaCreate,
     CategoriaList,
     CategoriaPost,

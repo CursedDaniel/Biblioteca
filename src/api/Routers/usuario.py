@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.crud.usuario import UsuarioCrud
+from src.crud.usuario_crud import UsuarioCrud
 from src.database.connection import get_session
-from src.schemas.usuario import (
+from src.api.schemas.usuario import (
     UsuarioCreate,
     UsuarioList,
     UsuarioPost,

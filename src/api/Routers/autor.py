@@ -3,9 +3,9 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from src.crud.autor import AutorCrud
+from src.crud.autor_crud import AutorCrud
 from src.database.connection import get_session
-from src.schemas.autor import (
+from src.api.schemas.autor import (
     AutorCreate,
     AutorList,
     AutorPostResponse,

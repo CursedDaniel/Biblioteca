@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.crud.multa import MultaCrud
+from src.crud.multa_crud import MultaCrud
 from src.database.connection import get_session
-from src.schemas.multa import (
+from src.api.schemas.multa import (
     MultaCreate,
     MultaList,
     MultaPost,

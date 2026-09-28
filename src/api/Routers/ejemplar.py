@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.crud.ejemplar import EjemplarCrud
+from src.crud.ejemplar_crud import EjemplarCrud
 from src.database.connection import get_session
-from src.schemas.ejemplar import (
+from src.api.schemas.ejemplar import (
     EjemplarCreate,
     EjemplarList,
     EjemplarPost,

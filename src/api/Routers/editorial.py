@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.crud.editorial import EditorialCrud
+from src.crud.editorial_crud import EditorialCrud
 from src.database.connection import get_session
-from src.schemas.editorial import (
+from src.api.schemas.editorial import (
     EditorialCreate,
     EditorialList,
     EditorialPost,
