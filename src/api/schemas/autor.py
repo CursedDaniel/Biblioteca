@@ -37,13 +37,13 @@ class AutorList(BaseModel):
     message: str
 
 
-class AutorPostResponse(BaseModel):
+class AutorPost(BaseModel):
     data: AutorRead
     status: int
     message: str
 
 
-class AutorPutResponse(BaseModel):
+class AutorPut(BaseModel):
     data: AutorRead
     status: int
     message: str

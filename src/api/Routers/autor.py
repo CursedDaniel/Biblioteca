@@ -8,8 +8,8 @@ from src.database.connection import get_session
 from src.api.schemas.autor import (
     AutorCreate,
     AutorList,
-    AutorPostResponse,
-    AutorPutResponse,
+    AutorPost,
+    AutorPut,
     AutorUpdate,
 )
 
@@ -20,7 +20,7 @@ def get_crud(session: Session = Depends(get_session)) -> AutorCrud:
     return AutorCrud(session)
 
 
-@router.post("/", response_model=AutorPostResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=AutorPost, status_code=status.HTTP_201_CREATED)
 def crear_autor(payload: AutorCreate, crud: AutorCrud = Depends(get_crud)):
     autor = crud.crear(
         nombre=payload.nombre,
@@ -42,7 +42,7 @@ def listar_autores(crud: AutorCrud = Depends(get_crud)):
     }
 
 
-@router.get("/{id_autor}", response_model=AutorPostResponse)
+@router.get("/{id_autor}", response_model=AutorPost)
 def obtener_autor(id_autor: uuid.UUID, crud: AutorCrud = Depends(get_crud)):
     autor = crud.obtener_por_id(id_autor)
 
@@ -52,7 +52,7 @@ def obtener_autor(id_autor: uuid.UUID, crud: AutorCrud = Depends(get_crud)):
     return {"data": autor, "status": 200, "message": "Autor obtenido correctamente"}
 
 
-@router.put("/{id_autor}", response_model=AutorPutResponse)
+@router.put("/{id_autor}", response_model=AutorPut)
 def actualizar_autor(
     id_autor: uuid.UUID,
     payload: AutorUpdate,
