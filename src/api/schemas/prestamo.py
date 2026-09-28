@@ -4,46 +4,49 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
 
-class EjemplarCreate(BaseModel):
-    id_libro: UUID
-    codigo_inventario: str
-    fecha_adquisicion: date | None = None
-    estado: str
-    ubicacion: str
+class PrestamoCreate(BaseModel):
+    id_usuario: UUID
+    id_ejemplar: UUID
+    fecha_prestamo: date
+    fecha_limite: date
+    fecha_devolucion: date | None = None
+    estado: str = "activo"
 
 
-class EjemplarUpdate(BaseModel):
-    id_libro: UUID | None = None
-    codigo_inventario: str | None = None
-    fecha_adquisicion: date | None = None
+class PrestamoUpdate(BaseModel):
+    id_usuario: UUID | None = None
+    id_ejemplar: UUID | None = None
+    fecha_prestamo: date | None = None
+    fecha_limite: date | None = None
+    fecha_devolucion: date | None = None
     estado: str | None = None
-    ubicacion: str | None = None
 
 
-class EjemplarRead(BaseModel):
+class PrestamoRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    id_prestamo: UUID
+    id_usuario: UUID
     id_ejemplar: UUID
-    id_libro: UUID
-    codigo_inventario: str
-    fecha_adquisicion: date
+    fecha_prestamo: date
+    fecha_limite: date
+    fecha_devolucion: date | None
     estado: str
-    ubicacion: str
 
 
-class EjemplarPost(BaseModel):
-    data: EjemplarRead
+class PrestamoPost(BaseModel):
+    data: PrestamoRead
     status: int
     message: str
 
 
-class EjemplarList(BaseModel):
-    data: list[EjemplarRead]
+class PrestamoList(BaseModel):
+    data: list[PrestamoRead]
     status: int
     message: str
 
 
-class EjemplarPut(BaseModel):
-    data: EjemplarRead
+class PrestamoPut(BaseModel):
+    data: PrestamoRead
     status: int
     message: str
