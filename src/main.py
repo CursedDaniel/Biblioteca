@@ -3,6 +3,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+<<<<<<< HEAD
 from src.api.routers.autores import autores_router
 from src.api.routers.categorias import categorias_router
 from src.api.routers.editoriales import editoriales_router
@@ -11,6 +12,16 @@ from src.api.routers.libros import libros_router
 from src.api.routers.multas import multas_router
 from src.api.routers.prestamos import prestamos_router
 from src.api.routers.usuarios import usuarios_router
+=======
+from src.api.routers.autor import router as autores_router
+from src.api.routers.categoria import router as categorias_router
+from src.api.routers.editorial import router as editoriales_router
+from src.api.routers.ejemplar import router as ejemplares_router
+from src.api.routers.libro import router as libros_router
+from src.api.routers.multa import router as multas_router
+from src.api.routers.prestamo import router as prestamos_router
+from src.api.routers.usuario import router as usuarios_router
+>>>>>>> c922d3fad4352d7260898beaf1eec40a3d2bab26
 
 # Creamos la aplicación FastAPI.
 app = FastAPI(
@@ -53,8 +64,12 @@ app.include_router(multas_router)
 # Permite ejecutar la API directamente con:
 # python -m src.main
 if __name__ == "__main__":
+<<<<<<< HEAD
     uvicorn.run(
         app,
         host="0.0.0.0",
         port=8000,
     )
+=======
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+>>>>>>> c922d3fad4352d7260898beaf1eec40a3d2bab26

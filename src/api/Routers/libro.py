@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.crud.libro import LibroCrud
+from src.crud.libro_crud import LibroCrud
 from src.database.connection import get_session
-from src.schemas.libro import (
+from src.api.schemas.libro import (
     LibroCreate,
     LibroList,
     LibroPost,
