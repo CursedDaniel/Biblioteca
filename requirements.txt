@@ -1,4 +1,7 @@
 rich
-sqlalchemy==2.0.37
+sqlalchemy>=2.0.37
 psycopg2-binary>=2.9.10
-python-dotenv==1.0.1
+fastapi
+uvicorn
+python-dotenv
+pydantic
